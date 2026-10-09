@@ -58,7 +58,6 @@
       border-right: 1px solid var(--line);
     }
 
-    /* ===== 修复1：topbar 提升层级，避免被 workspace 内容覆盖 ===== */
     .topbar {
       position: relative;
       z-index: 100;
@@ -132,7 +131,6 @@
       z-index: 1;
     }
 
-    /* ===== 自定义语言选择器 ===== */
     .lang-picker {
       position: relative;
       z-index: 210;
@@ -215,7 +213,6 @@
       transform: rotate(180deg);
     }
 
-    /* ===== 修复2：语言菜单防止被裁剪 + 移动端限高可滚动 ===== */
     .lang-menu {
       position: absolute;
       top: calc(100% + 8px);
@@ -296,7 +293,6 @@
       white-space: nowrap;
     }
 
-    /* ===== 修复3：workspace 明确 z-index，确保不会盖住 topbar ===== */
     .workspace {
       position: relative;
       z-index: 1;
@@ -774,22 +770,32 @@
     .result-main-hint.positive { color: var(--success); }
     .result-main-hint.negative { color: var(--danger); }
 
-    /* ===== 修复4：移动端单列 + 自然滚动 + 底部安全区 ===== */
+    /* ============================================================
+       移动端 / 平板：彻底回归文档流，整页可滚动
+       ============================================================ */
     @media (max-width: 1100px) {
-      html, body {
+      /* 1. html 和 body 都允许纵向滚动 */
+      html {
         height: auto;
         min-height: 100%;
         overflow-x: hidden;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
-        overscroll-behavior-y: contain;
       }
 
       body {
         display: block;
+        height: auto;
+        min-height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+        touch-action: pan-y;               /* 明确允许纵向滚动手势 */
+        -webkit-overflow-scrolling: touch;
       }
 
+      /* 2. page 从 flex 改为 block，避免高度计算问题 */
       .page {
+        display: block;
         height: auto;
         min-height: 100vh;
         min-height: 100dvh;
@@ -798,8 +804,14 @@
         border-right: none;
       }
 
+      /* 3. topbar 保持普通流，不再 sticky */
+      .topbar {
+        position: relative;
+      }
+
+      /* 4. workspace 从 grid 改为 block，各面板自然堆叠 */
       .workspace {
-        grid-template-columns: 1fr;
+        display: block;
         padding: 12px;
         padding-left: calc(12px + env(safe-area-inset-left, 0px));
         padding-right: calc(12px + env(safe-area-inset-right, 0px));
@@ -809,41 +821,45 @@
         min-height: 0;
       }
 
+      /* 5. 面板不再裁剪内容 */
       .panel {
-        min-height: 0;
         overflow: visible;
+        min-height: 0;
       }
 
-      /* 图表区：移动端用视口比例，避免过高或塌陷 */
       .chart-panel {
         height: auto;
         min-height: 0;
+        margin-bottom: 12px;
+        padding: 12px;
       }
 
+      /* 6. 图表容器改为固定高度，避免 flex 计算问题 */
       .chart-wrap {
-        height: 46vh;
-        min-height: 260px;
-        max-height: 460px;
-        flex: 0 0 auto;
+        flex: none;
+        height: 300px;
+        min-height: 0;
+        max-height: none;
       }
 
       .panel.calc {
-        min-height: auto;
+        padding: 12px;
         overflow: visible;
+        min-height: auto;
       }
 
       .calc-body {
-        flex: 0 0 auto;
+        flex: none;
         overflow: visible;
       }
 
       .result-card {
-        flex: 0 0 auto;
+        flex: none;
         min-height: auto;
       }
 
       .result-main {
-        flex: 0 0 auto;
+        flex: none;
         padding-top: 16px;
         padding-bottom: 8px;
         justify-content: center;
@@ -864,18 +880,20 @@
       .lang-menu { min-width: 140px; }
       .status-pill { font-size: 10px; padding: 6px 8px; }
 
-      .workspace { padding: 10px; gap: 12px;
+      .workspace {
+        padding: 10px;
         padding-left: calc(10px + env(safe-area-inset-left, 0px));
         padding-right: calc(10px + env(safe-area-inset-right, 0px));
         padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
       }
+
       .panel { border-radius: 14px; }
       .chart-panel, .panel.calc { padding: 12px; }
 
+      .chart-panel { margin-bottom: 10px; }
+
       .chart-wrap {
-        height: 42vh;
-        min-height: 240px;
-        max-height: 400px;
+        height: 280px;
       }
 
       .field-row { grid-template-columns: 1fr; }
@@ -1037,9 +1055,6 @@
     (function () {
       'use strict';
 
-      /* ============================================================
-         多语言词典
-         ============================================================ */
       const i18n = {
         'zh-CN': {
           pageTitle: 'FX Flow — 汇率与换汇差额',
@@ -1133,30 +1148,20 @@
         }
       };
 
-      const LANG_LABELS = {
-        'zh-CN': '简体中文',
-        'en': 'English',
-        'ja': '日本語'
-      };
-
+      const LANG_LABELS = { 'zh-CN': '简体中文', 'en': 'English', 'ja': '日本語' };
       let currentLang = 'zh-CN';
 
       function t(key) {
         const dict = i18n[currentLang] || i18n['zh-CN'];
         const v = dict[key];
-        if (typeof v === 'string') return v;
-        return i18n['zh-CN'][key] || key;
+        return typeof v === 'string' ? v : (i18n['zh-CN'][key] || key);
       }
-
       function tf(key, ...args) {
         const dict = i18n[currentLang] || i18n['zh-CN'];
         const v = dict[key] !== undefined ? dict[key] : i18n['zh-CN'][key];
         return typeof v === 'function' ? v(...args) : v;
       }
 
-      /* ============================================================
-         DOM 引用
-         ============================================================ */
       const langPickerEl = document.getElementById('langPicker');
       const langTriggerEl = document.getElementById('langTrigger');
       const langMenuEl = document.getElementById('langMenu');
@@ -1194,35 +1199,27 @@
       const periodButtons = Array.from(document.querySelectorAll('.period-btn'));
       let chartInstance = null;
 
-      /* ============================================================
-         自定义语言选择器
-         ============================================================ */
+      /* ===== 语言选择器 ===== */
       function openLangMenu() {
         langMenuEl.classList.add('open');
         langTriggerEl.setAttribute('aria-expanded', 'true');
       }
-
       function closeLangMenu() {
         langMenuEl.classList.remove('open');
         langTriggerEl.setAttribute('aria-expanded', 'false');
       }
-
       function toggleLangMenu() {
         if (langMenuEl.classList.contains('open')) closeLangMenu();
         else openLangMenu();
       }
-
       function updateLangUI() {
         langCurrentLabelEl.textContent = LANG_LABELS[currentLang] || currentLang;
-        langOptions.forEach((o) => {
-          o.classList.toggle('active', o.dataset.value === currentLang);
-        });
+        langOptions.forEach((o) => o.classList.toggle('active', o.dataset.value === currentLang));
       }
-
       function selectLang(value) {
         if (!i18n[value]) return;
         currentLang = value;
-        try { localStorage.setItem('fxflow.lang', currentLang); } catch (err) { /* ignore */ }
+        try { localStorage.setItem('fxflow.lang', currentLang); } catch (err) {}
         updateLangUI();
         applyLang();
         closeLangMenu();
@@ -1232,7 +1229,6 @@
         e.stopPropagation();
         toggleLangMenu();
       });
-
       langOptions.forEach((opt) => {
         opt.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -1245,35 +1241,25 @@
           }
         });
       });
-
-      /* ===== 修复5：pointerdown 监听，兼容触摸设备点击外部关闭 ===== */
       document.addEventListener('pointerdown', (e) => {
         if (!langPickerEl.contains(e.target)) closeLangMenu();
       });
-
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') closeLangMenu();
       });
 
-      /* ============================================================
-         语言应用
-         ============================================================ */
       function applyLang() {
         document.documentElement.lang = currentLang;
         document.title = t('pageTitle');
-
         document.querySelectorAll('[data-i18n]').forEach((el) => {
           el.textContent = t(el.dataset.i18n);
         });
-
         document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => {
           el.placeholder = t(el.dataset.i18nPlaceholder);
         });
-
         document.querySelectorAll('[data-i18n-aria]').forEach((el) => {
           el.setAttribute('aria-label', t(el.dataset.i18nAria));
         });
-
         if (chartOverlayEl && chartOverlayEl.style.display === 'flex') {
           if (chartOverlayEl.dataset.state === 'loading') {
             chartOverlayEl.textContent = t('loadingRates');
@@ -1281,16 +1267,13 @@
             chartOverlayEl.textContent = t('loadFailed');
           }
         }
-
         calculate();
       }
-
       function detectInitialLang() {
         try {
           const saved = localStorage.getItem('fxflow.lang');
           if (saved && i18n[saved]) return saved;
-        } catch (err) { /* ignore */ }
-
+        } catch (err) {}
         const nav = (navigator.language || 'zh-CN').toLowerCase();
         if (nav.startsWith('zh')) return 'zh-CN';
         if (nav.startsWith('ja')) return 'ja';
@@ -1298,15 +1281,12 @@
         return 'zh-CN';
       }
 
-      /* ============================================================
-         工具函数
-         ============================================================ */
+      /* ===== 工具 ===== */
       function roundRate(value, decimals) {
         const factor = Math.pow(10, decimals);
         const rounded = Math.round((value + Number.EPSILON) * factor) / factor;
         return Number(rounded.toFixed(decimals));
       }
-
       function formatRateForInput(value) {
         const abs = Math.abs(value);
         let decimals;
@@ -1316,11 +1296,9 @@
         else decimals = 8;
         return String(roundRate(value, decimals));
       }
-
       function formatNumber(value) {
         return Number(value || 0).toFixed(2);
       }
-
       function syncPresetActive() {
         if (!presetButtons.length) return;
         const current = parseFloat(principalEl.value);
@@ -1329,9 +1307,7 @@
         });
       }
 
-      /* ============================================================
-         计算 + 差额方向提示
-         ============================================================ */
+      /* ===== 计算 ===== */
       function calculate() {
         const principal = parseFloat(principalEl.value) || 0;
         const rateA = parseFloat(rateAEl.value) || 0;
@@ -1365,7 +1341,6 @@
         void diffEl.offsetWidth;
         diffEl.classList.add('bump');
         window.setTimeout(() => diffEl.classList.remove('bump'), 220);
-
         syncPresetActive();
       }
 
@@ -1374,20 +1349,16 @@
           button.classList.toggle('active', String(button.dataset.period) === String(value));
         });
       }
-
       function formatDate(date) {
         return date.toISOString().slice(0, 10);
       }
-
       function formatDateLabel(date, days) {
         if (days <= 90) return date.slice(5);
         else if (days <= 365) return date.slice(0, 7);
         else return date.slice(0, 4);
       }
 
-      /* ============================================================
-         拉取汇率 + 渲染图表
-         ============================================================ */
+      /* ===== 拉取数据 ===== */
       async function fetchRates(options = {}) {
         const { syncRates = false } = options;
         const pairKey = currencyPairEl.value;
@@ -1415,7 +1386,6 @@
 
           const labels = [];
           const values = [];
-
           Object.keys(data.rates).sort().forEach((date) => {
             const value = data.rates[date]?.[pair.target];
             if (value) {
@@ -1457,7 +1427,6 @@
       function renderChart(labels, values, pairKey) {
         const pair = currencyMap[pairKey];
         const ctx = document.getElementById('exchangeChart').getContext('2d');
-
         if (chartInstance) chartInstance.destroy();
 
         const displayLabels = labels.map((label, idx) => {
@@ -1500,37 +1469,20 @@
                 borderWidth: 1,
                 displayColors: false,
                 callbacks: {
-                  title: function (items) {
-                    const item = items[0];
-                    return item.label ? item.label : '';
-                  },
-                  label: function (context) {
-                    return `${pair.base}/${pair.target}: ${context.parsed.y.toFixed(4)}`;
-                  }
+                  title: (items) => items[0].label || '',
+                  label: (context) => `${pair.base}/${pair.target}: ${context.parsed.y.toFixed(4)}`
                 }
               }
             },
             scales: {
               x: {
                 grid: { display: false, drawBorder: false },
-                ticks: {
-                  color: '#8aa0b7',
-                  font: { size: 10 },
-                  maxRotation: 0,
-                  autoSkip: true,
-                  maxTicksLimit: 8
-                },
+                ticks: { color: '#8aa0b7', font: { size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 8 },
                 border: { display: false }
               },
               y: {
                 grid: { color: 'rgba(138,160,183,0.1)', drawBorder: false },
-                ticks: {
-                  color: '#8aa0b7',
-                  font: { size: 10 },
-                  callback: function (value) {
-                    return Number(value).toFixed(2);
-                  }
-                },
+                ticks: { color: '#8aa0b7', font: { size: 10 }, callback: (v) => Number(v).toFixed(2) },
                 border: { display: false }
               }
             }
@@ -1538,9 +1490,7 @@
         });
       }
 
-      /* ============================================================
-         数字输入框箭头：点击 + 长按连续
-         ============================================================ */
+      /* ===== 数字输入框箭头 ===== */
       const ARROW_ZONE = 30;
       const HOLD_DELAY = 350;
       const HOLD_SPEED = 60;
@@ -1549,7 +1499,6 @@
         const step = parseFloat(input.step);
         return Number.isFinite(step) && step > 0 ? step : 1;
       }
-
       function adjustValue(input, direction) {
         const step = getStep(input);
         const current = parseFloat(input.value);
@@ -1565,7 +1514,6 @@
 
         const nextStr = String(next);
         if (nextStr === input.value) return;
-
         input.value = nextStr;
         input.dispatchEvent(new Event('input', { bubbles: true }));
       }
@@ -1576,14 +1524,12 @@
 
         let holdTimer = null;
         let repeatTimer = null;
-
         const stopHold = () => {
           window.clearTimeout(holdTimer);
           window.clearInterval(repeatTimer);
           holdTimer = null;
           repeatTimer = null;
         };
-
         const startHold = (direction) => {
           stopHold();
           holdTimer = window.setTimeout(() => {
@@ -1599,7 +1545,6 @@
 
           event.preventDefault();
           input.focus();
-
           const direction = (event.clientY - rect.top) < rect.height / 2 ? 1 : -1;
           adjustValue(input, direction);
           startHold(direction);
@@ -1611,9 +1556,7 @@
         wrapper.addEventListener('pointerleave', stopHold);
       });
 
-      /* ============================================================
-         本金推荐按钮
-         ============================================================ */
+      /* ===== 本金快捷按钮 ===== */
       presetButtons.forEach((btn) => {
         btn.addEventListener('click', () => {
           principalEl.value = btn.dataset.value;
@@ -1621,13 +1564,8 @@
         });
       });
 
-      /* ============================================================
-         事件绑定
-         ============================================================ */
-      currencyPairEl.addEventListener('change', function () {
-        fetchRates({ syncRates: true });
-      });
-
+      /* ===== 事件绑定 ===== */
+      currencyPairEl.addEventListener('change', () => fetchRates({ syncRates: true }));
       principalEl.addEventListener('input', calculate);
       rateAEl.addEventListener('input', calculate);
       rateBEl.addEventListener('input', calculate);
@@ -1639,13 +1577,10 @@
         });
       });
 
-      /* ============================================================
-         初始化
-         ============================================================ */
+      /* ===== 初始化 ===== */
       currentLang = detectInitialLang();
       updateLangUI();
       applyLang();
-
       setPeriodActive(90);
       fetchRates({ syncRates: true });
     })();
