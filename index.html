@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FX Flow — 汇率与换汇差额</title>
+  <title>汇率与换汇差额</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%230b1320'/><rect x='12' y='12' width='76' height='76' rx='12' fill='none' stroke='%233aa0ff' stroke-width='4'/><text x='50' y='60' text-anchor='middle' dominant-baseline='middle' font-size='48' fill='%235ad4ff' font-weight='bold'>¥$</text></svg>" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
@@ -96,9 +96,7 @@
       box-shadow: 0 14px 28px rgba(58,160,255,0.26);
     }
 
-    .brand-copy {
-      min-width: 0;
-    }
+    .brand-copy { min-width: 0; }
 
     .brand-label {
       white-space: nowrap;
@@ -140,7 +138,7 @@
     .workspace {
       flex: 1;
       display: grid;
-      grid-template-columns: minmax(0, 1.8fr) minmax(340px, 0.85fr);
+      grid-template-columns: minmax(0, 1.6fr) minmax(360px, 1fr);
       gap: 14px;
       padding: 14px;
       min-height: 0;
@@ -359,6 +357,7 @@
       padding-bottom: 12px;
       border-bottom: 1px solid var(--line);
       margin-bottom: 14px;
+      flex-shrink: 0;
     }
 
     .calc-title {
@@ -385,12 +384,15 @@
       flex-direction: column;
       gap: 12px;
       overflow: hidden;
+      flex: 1;
+      min-height: 0;
     }
 
     .field-group {
       display: flex;
       flex-direction: column;
       gap: 6px;
+      flex-shrink: 0;
     }
 
     .field-group label {
@@ -398,6 +400,50 @@
       color: var(--muted);
       font-weight: 700;
       letter-spacing: 0.03em;
+    }
+
+    .field-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .principal-presets {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .preset-btn {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.02);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      line-height: 1.5;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      font-family: inherit;
+    }
+
+    .preset-btn:hover {
+      border-color: rgba(90,212,255,0.35);
+      color: var(--text);
+      background: rgba(90,212,255,0.06);
+    }
+
+    .preset-btn.active {
+      background: linear-gradient(135deg, rgba(58,160,255,0.22), rgba(90,212,255,0.1));
+      border-color: rgba(90,212,255,0.45);
+      color: var(--primary-2);
+      box-shadow: inset 0 0 0 1px rgba(90,212,255,0.08);
     }
 
     .number-input-wrapper {
@@ -409,7 +455,7 @@
       border-radius: 10px;
       border: 1px solid rgba(133, 157, 191, 0.25);
       background: rgba(9, 17, 27, 0.7);
-      padding: 10px 12px;
+      padding: 10px 28px 10px 12px;
       color: var(--text);
       font-size: 14px;
       outline: none;
@@ -422,7 +468,7 @@
       margin: 0;
     }
 
-    .field-group input[type="number"][type="number"] {
+    .field-group input[type="number"] {
       -moz-appearance: textfield;
     }
 
@@ -440,7 +486,9 @@
       width: 6px;
       height: 6px;
       border-style: solid;
-      pointer-events: none;
+      pointer-events: auto;
+      cursor: pointer;
+      z-index: 2;
       opacity: 0.5;
       transition: opacity 0.2s ease;
     }
@@ -462,35 +510,23 @@
       opacity: 1;
     }
 
-    /* ===== 修复：让数字输入框的箭头可以点击 ===== */
-    .number-input-wrapper::before,
-    .number-input-wrapper::after {
-      pointer-events: auto;
-      cursor: pointer;
-      z-index: 2;
-    }
-
-    /* 给箭头留出足够的点击热区 */
-    .number-input-wrapper {
-      --arrow-zone: 26px;
-    }
-
-    .field-group input[type="number"] {
-      padding-right: 28px;
-    }
-
     .field-row {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
+      flex-shrink: 0;
     }
 
     .result-card {
       background: linear-gradient(135deg, rgba(58,160,255,0.12), rgba(90,212,255,0.06));
       border: 1px solid rgba(90,212,255,0.18);
       border-radius: 12px;
-      padding: 10px;
+      padding: 14px 16px;
       margin-top: 2px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
     }
 
     .result-line {
@@ -498,81 +534,104 @@
       justify-content: space-between;
       align-items: center;
       gap: 8px;
-      padding: 7px 0;
+      padding: 8px 0;
       border-bottom: 1px solid rgba(255,255,255,0.06);
       font-size: 11px;
       color: var(--muted);
+      flex-shrink: 0;
     }
 
-    .result-line:last-child {
+    .result-line:last-of-type {
       border-bottom: none;
-      padding-bottom: 0;
     }
 
     .result-line strong {
       color: var(--text);
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 700;
+      font-variant-numeric: tabular-nums;
     }
 
     .result-main {
-      margin-top: 8px;
-      padding-top: 8px;
-      border-top: 1px solid rgba(255,255,255,0.09);
+      flex: 1;
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
+      justify-content: center;
       align-items: center;
-      gap: 8px;
-      color: var(--muted);
+      gap: 10px;
+      margin-top: 10px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255,255,255,0.09);
+      min-height: 0;
+    }
+
+    .result-main-label {
       font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      font-weight: 700;
+      text-transform: uppercase;
     }
 
     .result-main strong {
-      font-size: clamp(1.3rem, 2vw, 1.8rem);
+      font-size: clamp(2rem, 3.4vw, 3rem);
       color: var(--warning);
       letter-spacing: 0.04em;
+      line-height: 1.1;
+      font-weight: 800;
+      text-shadow: 0 4px 20px rgba(246, 196, 83, 0.18);
+      transition: transform 0.2s ease, color 0.2s ease;
+      font-variant-numeric: tabular-nums;
     }
 
+    .result-main strong.bump {
+      transform: scale(1.04);
+    }
+
+    .result-main-hint {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+      font-weight: 600;
+      text-align: center;
+      line-height: 1.5;
+      max-width: 95%;
+      transition: color 0.2s ease;
+    }
+
+    .result-main-hint.positive { color: var(--success); }
+    .result-main-hint.negative { color: var(--danger); }
+
     @media (max-width: 1100px) {
-      .workspace {
-        grid-template-columns: 1fr;
-      }
-
-      .page {
-        height: auto;
-        min-height: 100vh;
-      }
-
-      body {
-        overflow: auto;
-      }
+      .workspace { grid-template-columns: 1fr; }
+      .page { height: auto; min-height: 100vh; }
+      body { overflow: auto; }
+      .panel.calc { min-height: auto; }
+      .result-card { flex: 0 0 auto; }
+      .result-main { padding-top: 16px; padding-bottom: 8px; }
     }
 
     @media (max-width: 640px) {
-      .topbar {
-        padding: 12px 14px;
-      }
+      .topbar { padding: 12px 14px; }
+      .brand-title { font-size: 1rem; }
+      .workspace { padding: 10px; gap: 12px; }
+      .panel { border-radius: 14px; }
+      .chart-panel, .panel.calc { padding: 12px; }
+      .field-row { grid-template-columns: 1fr; }
+      .chart-header { align-items: flex-start; }
+      .chart-toolbox { flex-direction: column; align-items: flex-start; }
+      .meta-strip { gap: 8px; }
+      .meta-chip { font-size: 9px; padding: 4px 8px; }
+      .meta-chip strong { font-size: 10px; }
+      .result-main strong { font-size: 2.2rem; }
+      .calc-body { gap: 10px; }
+      .preset-btn { font-size: 9px; padding: 2px 7px; }
+    }
 
-      .brand-title {
-        font-size: 1rem;
-      }
-
-      .workspace {
-        padding: 10px;
-      }
-
-      .field-row {
-        grid-template-columns: 1fr;
-      }
-
-      .chart-header {
-        align-items: flex-start;
-      }
-
-      .chart-toolbox {
-        flex-direction: column;
-        align-items: flex-start;
-      }
+    @media (max-width: 380px) {
+      .result-main strong { font-size: 1.9rem; }
+      .period-btn { padding: 4px 8px; font-size: 9px; }
+      .preset-btn { font-size: 9px; padding: 2px 6px; }
     }
   </style>
 </head>
@@ -638,12 +697,21 @@
       <aside class="panel calc">
         <div class="calc-header">
           <div class="calc-title">换汇计算器</div>
-          <span class="mini-pill">风险检测</span>
         </div>
 
         <div class="calc-body">
           <div class="field-group">
-            <label for="principal">本金</label>
+            <div class="field-label-row">
+              <label for="principal">本金</label>
+              <div class="principal-presets" id="principalPresets">
+                <button type="button" class="preset-btn" data-value="100" title="100">100</button>
+                <button type="button" class="preset-btn" data-value="1000" title="1,000">1k</button>
+                <button type="button" class="preset-btn" data-value="10000" title="10,000">10k</button>
+                <button type="button" class="preset-btn" data-value="50000" title="50,000">50k</button>
+                <button type="button" class="preset-btn" data-value="100000" title="100,000">100k</button>
+                <button type="button" class="preset-btn" data-value="1000000" title="1,000,000">1M</button>
+              </div>
+            </div>
             <div class="number-input-wrapper">
               <input id="principal" type="number" value="10000" min="0" step="100" placeholder="请输入金额">
             </div>
@@ -653,13 +721,13 @@
             <div class="field-group">
               <label for="rateA">汇率 A</label>
               <div class="number-input-wrapper">
-                <input id="rateA" type="number" value="6.66" min="0.01" step="0.01" placeholder="例如 6.66">
+                <input id="rateA" type="number" value="6.66" min="0.0001" step="0.0001" placeholder="例如 6.66">
               </div>
             </div>
             <div class="field-group">
               <label for="rateB">汇率 B</label>
               <div class="number-input-wrapper">
-                <input id="rateB" type="number" value="6.67" min="0.01" step="0.01" placeholder="例如 6.67">
+                <input id="rateB" type="number" value="6.67" min="0.0001" step="0.0001" placeholder="例如 6.67">
               </div>
             </div>
           </div>
@@ -674,8 +742,9 @@
               <strong id="resultB">--</strong>
             </div>
             <div class="result-main">
-              <span>差额</span>
+              <span class="result-main-label">差额</span>
               <strong id="difference">--</strong>
+              <span class="result-main-hint" id="differenceHint">--</span>
             </div>
           </div>
         </div>
@@ -694,11 +763,17 @@
       const resultAEl = document.getElementById('resultA');
       const resultBEl = document.getElementById('resultB');
       const diffEl = document.getElementById('difference');
+      const diffHintEl = document.getElementById('differenceHint');
       const metaLatestEl = document.getElementById('metaLatest');
       const metaOpenEl = document.getElementById('metaOpen');
       const metaHighEl = document.getElementById('metaHigh');
       const metaLowEl = document.getElementById('metaLow');
       const chartOverlayEl = document.getElementById('chartOverlay');
+
+      const principalPresetsEl = document.getElementById('principalPresets');
+      const presetButtons = principalPresetsEl
+        ? Array.from(principalPresetsEl.querySelectorAll('.preset-btn'))
+        : [];
 
       const currencyMap = {
         USD_CNY: { base: 'USD', target: 'CNY', label: 'USD/CNY' },
@@ -712,8 +787,32 @@
       const periodButtons = Array.from(document.querySelectorAll('.period-btn'));
       let chartInstance = null;
 
+      function roundRate(value, decimals) {
+        const factor = Math.pow(10, decimals);
+        const rounded = Math.round((value + Number.EPSILON) * factor) / factor;
+        return Number(rounded.toFixed(decimals));
+      }
+
+      function formatRateForInput(value) {
+        const abs = Math.abs(value);
+        let decimals;
+        if (abs >= 100) decimals = 2;
+        else if (abs >= 1) decimals = 4;
+        else if (abs >= 0.01) decimals = 6;
+        else decimals = 8;
+        return String(roundRate(value, decimals));
+      }
+
       function formatNumber(value) {
         return Number(value || 0).toFixed(2);
+      }
+
+      function syncPresetActive() {
+        if (!presetButtons.length) return;
+        const current = parseFloat(principalEl.value);
+        presetButtons.forEach((btn) => {
+          btn.classList.toggle('active', Number(btn.dataset.value) === current);
+        });
       }
 
       function calculate() {
@@ -723,10 +822,34 @@
         const resultA = rateA > 0 ? principal / rateA : 0;
         const resultB = rateB > 0 ? principal / rateB : 0;
         const diff = resultA - resultB;
+        const absDiff = Math.abs(diff);
 
         resultAEl.textContent = formatNumber(resultA);
         resultBEl.textContent = formatNumber(resultB);
-        diffEl.textContent = formatNumber(Math.abs(diff));
+
+        if (absDiff < 0.005) {
+          diffEl.textContent = '0.00';
+          diffEl.style.color = 'var(--muted)';
+          diffHintEl.textContent = '两种汇率换得金额相同';
+          diffHintEl.className = 'result-main-hint';
+        } else if (diff > 0) {
+          diffEl.textContent = '+' + formatNumber(absDiff);
+          diffEl.style.color = 'var(--success)';
+          diffHintEl.textContent = '汇率 A 更划算，比 B 多换 ' + formatNumber(absDiff);
+          diffHintEl.className = 'result-main-hint positive';
+        } else {
+          diffEl.textContent = '−' + formatNumber(absDiff);
+          diffEl.style.color = 'var(--danger)';
+          diffHintEl.textContent = '汇率 B 更划算，比 A 多换 ' + formatNumber(absDiff);
+          diffHintEl.className = 'result-main-hint negative';
+        }
+
+        diffEl.classList.remove('bump');
+        void diffEl.offsetWidth;
+        diffEl.classList.add('bump');
+        window.setTimeout(() => diffEl.classList.remove('bump'), 220);
+
+        syncPresetActive();
       }
 
       function setPeriodActive(value) {
@@ -740,16 +863,13 @@
       }
 
       function formatDateLabel(date, days) {
-        if (days <= 90) {
-          return date.slice(5);
-        } else if (days <= 365) {
-          return date.slice(0, 7);
-        } else {
-          return date.slice(0, 4);
-        }
+        if (days <= 90) return date.slice(5);
+        else if (days <= 365) return date.slice(0, 7);
+        else return date.slice(0, 4);
       }
 
-      async function fetchRates() {
+      async function fetchRates(options = {}) {
+        const { syncRates = false } = options;
         const pairKey = currencyPairEl.value;
         const pair = currencyMap[pairKey];
         const days = Number(document.querySelector('.period-btn.active')?.dataset.period || 90);
@@ -783,9 +903,7 @@
             }
           });
 
-          if (!values.length) {
-            throw new Error('无有效汇率');
-          }
+          if (!values.length) throw new Error('无有效汇率');
 
           renderChart(labels, values, pairKey);
 
@@ -799,6 +917,13 @@
           metaHighEl.textContent = maxValue.toFixed(4);
           metaLowEl.textContent = minValue.toFixed(4);
           chartOverlayEl.style.display = 'none';
+
+          if (syncRates) {
+            const formatted = formatRateForInput(latestValue);
+            rateAEl.value = formatted;
+            rateBEl.value = formatted;
+            calculate();
+          }
         } catch (err) {
           console.error(err);
           chartOverlayEl.textContent = '数据加载失败';
@@ -810,9 +935,7 @@
         const pair = currencyMap[pairKey];
         const ctx = document.getElementById('exchangeChart').getContext('2d');
 
-        if (chartInstance) {
-          chartInstance.destroy();
-        }
+        if (chartInstance) chartInstance.destroy();
 
         const displayLabels = labels.map((label, idx) => {
           const step = Math.max(1, Math.ceil(labels.length / 8));
@@ -835,20 +958,14 @@
               backgroundColor: 'rgba(90, 212, 255, 0.12)',
               borderWidth: 2.5,
               fill: true,
-              tension: 0.38,
+              tension: 0.38
             }]
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            interaction: {
-              mode: 'index',
-              intersect: false,
-            },
-            animation: {
-              duration: 450,
-              easing: 'easeOutQuart'
-            },
+            interaction: { mode: 'index', intersect: false },
+            animation: { duration: 450, easing: 'easeOutQuart' },
             plugins: {
               legend: { display: false },
               tooltip: {
@@ -860,11 +977,11 @@
                 borderWidth: 1,
                 displayColors: false,
                 callbacks: {
-                  title: function(items) {
+                  title: function (items) {
                     const item = items[0];
                     return item.label ? item.label : '';
                   },
-                  label: function(context) {
+                  label: function (context) {
                     return `${pair.base}/${pair.target}: ${context.parsed.y.toFixed(4)}`;
                   }
                 }
@@ -872,46 +989,35 @@
             },
             scales: {
               x: {
-                grid: {
-                  display: false,
-                  drawBorder: false,
-                },
+                grid: { display: false, drawBorder: false },
                 ticks: {
                   color: '#8aa0b7',
                   font: { size: 10 },
                   maxRotation: 0,
                   autoSkip: true,
-                  maxTicksLimit: 8,
+                  maxTicksLimit: 8
                 },
-                border: {
-                  display: false
-                }
+                border: { display: false }
               },
               y: {
-                grid: {
-                  color: 'rgba(138,160,183,0.1)',
-                  drawBorder: false,
-                },
+                grid: { color: 'rgba(138,160,183,0.1)', drawBorder: false },
                 ticks: {
                   color: '#8aa0b7',
                   font: { size: 10 },
-                  callback: function(value) {
+                  callback: function (value) {
                     return Number(value).toFixed(2);
                   }
                 },
-                border: {
-                  display: false
-                }
+                border: { display: false }
               }
             }
           }
         });
       }
 
-      /* ===== 修复：数字输入框箭头点击步进 ===== */
-      const ARROW_ZONE = 26;    // 右侧箭头点击热区宽度（px）
-      const HOLD_DELAY = 350;   // 长按多久开始连续步进（ms）
-      const HOLD_SPEED = 60;    // 连续步进间隔（ms）
+      const ARROW_ZONE = 30;
+      const HOLD_DELAY = 350;
+      const HOLD_SPEED = 60;
 
       function getStep(input) {
         const step = parseFloat(input.step);
@@ -961,10 +1067,9 @@
 
         wrapper.addEventListener('pointerdown', (event) => {
           if (event.button !== 0) return;
-
           const rect = wrapper.getBoundingClientRect();
           const offsetX = event.clientX - rect.left;
-          if (offsetX < rect.width - ARROW_ZONE) return; // 不在箭头区域，交给输入框自身
+          if (offsetX < rect.width - ARROW_ZONE) return;
 
           event.preventDefault();
           input.focus();
@@ -980,9 +1085,15 @@
         wrapper.addEventListener('pointerleave', stopHold);
       });
 
+      presetButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          principalEl.value = btn.dataset.value;
+          principalEl.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+      });
+
       currencyPairEl.addEventListener('change', function () {
-        fetchRates();
-        calculate();
+        fetchRates({ syncRates: true });
       });
 
       principalEl.addEventListener('input', calculate);
@@ -992,13 +1103,13 @@
       periodButtons.forEach((button) => {
         button.addEventListener('click', function () {
           setPeriodActive(this.dataset.period);
-          fetchRates();
+          fetchRates({ syncRates: false });
         });
       });
 
       calculate();
       setPeriodActive(90);
-      fetchRates();
+      fetchRates({ syncRates: true });
     })();
   </script>
 </body>
