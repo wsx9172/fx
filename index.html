@@ -462,6 +462,23 @@
       opacity: 1;
     }
 
+    /* ===== 修复：让数字输入框的箭头可以点击 ===== */
+    .number-input-wrapper::before,
+    .number-input-wrapper::after {
+      pointer-events: auto;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    /* 给箭头留出足够的点击热区 */
+    .number-input-wrapper {
+      --arrow-zone: 26px;
+    }
+
+    .field-group input[type="number"] {
+      padding-right: 28px;
+    }
+
     .field-row {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -890,6 +907,78 @@
           }
         });
       }
+
+      /* ===== 修复：数字输入框箭头点击步进 ===== */
+      const ARROW_ZONE = 26;    // 右侧箭头点击热区宽度（px）
+      const HOLD_DELAY = 350;   // 长按多久开始连续步进（ms）
+      const HOLD_SPEED = 60;    // 连续步进间隔（ms）
+
+      function getStep(input) {
+        const step = parseFloat(input.step);
+        return Number.isFinite(step) && step > 0 ? step : 1;
+      }
+
+      function adjustValue(input, direction) {
+        const step = getStep(input);
+        const current = parseFloat(input.value);
+        let next = (Number.isFinite(current) ? current : 0) + direction * step;
+
+        const min = parseFloat(input.min);
+        const max = parseFloat(input.max);
+        if (Number.isFinite(min)) next = Math.max(min, next);
+        if (Number.isFinite(max)) next = Math.min(max, next);
+
+        const decimals = (String(step).split('.')[1] || '').length;
+        next = decimals > 0 ? Number(next.toFixed(decimals)) : Math.round(next);
+
+        const nextStr = String(next);
+        if (nextStr === input.value) return;
+
+        input.value = nextStr;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+
+      document.querySelectorAll('.number-input-wrapper').forEach((wrapper) => {
+        const input = wrapper.querySelector('input[type="number"]');
+        if (!input) return;
+
+        let holdTimer = null;
+        let repeatTimer = null;
+
+        const stopHold = () => {
+          window.clearTimeout(holdTimer);
+          window.clearInterval(repeatTimer);
+          holdTimer = null;
+          repeatTimer = null;
+        };
+
+        const startHold = (direction) => {
+          stopHold();
+          holdTimer = window.setTimeout(() => {
+            repeatTimer = window.setInterval(() => adjustValue(input, direction), HOLD_SPEED);
+          }, HOLD_DELAY);
+        };
+
+        wrapper.addEventListener('pointerdown', (event) => {
+          if (event.button !== 0) return;
+
+          const rect = wrapper.getBoundingClientRect();
+          const offsetX = event.clientX - rect.left;
+          if (offsetX < rect.width - ARROW_ZONE) return; // 不在箭头区域，交给输入框自身
+
+          event.preventDefault();
+          input.focus();
+
+          const direction = (event.clientY - rect.top) < rect.height / 2 ? 1 : -1;
+          adjustValue(input, direction);
+          startHold(direction);
+        });
+
+        window.addEventListener('pointerup', stopHold);
+        window.addEventListener('pointercancel', stopHold);
+        window.addEventListener('blur', stopHold);
+        wrapper.addEventListener('pointerleave', stopHold);
+      });
 
       currencyPairEl.addEventListener('change', function () {
         fetchRates();
