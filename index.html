@@ -137,59 +137,6 @@
       letter-spacing: 0.03em;
     }
 
-    .currency-pair-wrapper {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-    }
-
-    .ghost-select {
-      appearance: none;
-      border: 1px solid rgba(90, 212, 255, 0.4);
-      background: rgba(9, 24, 40, 0.85);
-      color: var(--primary-2);
-      font-size: 12px;
-      border-radius: 8px;
-      padding: 8px 30px 8px 12px;
-      outline: none;
-      min-width: 140px;
-      cursor: pointer;
-      font-weight: 700;
-      letter-spacing: 0.03em;
-      transition: all 0.2s ease;
-    }
-
-    .ghost-select:hover {
-      background: rgba(9, 24, 40, 0.95);
-      border-color: rgba(90, 212, 255, 0.6);
-    }
-
-    .ghost-select:focus {
-      background: rgba(9, 24, 40, 0.95);
-      border-color: rgba(90, 212, 255, 0.8);
-      box-shadow: 0 0 0 3px rgba(58, 160, 255, 0.15);
-    }
-
-    .ghost-select option {
-      background: #0d1b2a;
-      color: #edf6ff;
-      padding: 8px;
-    }
-
-    .currency-pair-wrapper::after {
-      content: '';
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 0;
-      height: 0;
-      border-left: 5px solid transparent;
-      border-right: 5px solid transparent;
-      border-top: 6px solid rgba(90, 212, 255, 0.7);
-      pointer-events: none;
-    }
-
     .workspace {
       flex: 1;
       display: grid;
@@ -207,12 +154,12 @@
       box-shadow: var(--shadow);
       overflow: hidden;
       min-height: 0;
+      display: flex;
+      flex-direction: column;
     }
 
     .chart-panel {
-      display: flex;
-      flex-direction: column;
-      padding: 14px 14px 10px;
+      padding: 14px;
       min-height: 0;
     }
 
@@ -221,8 +168,10 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      padding: 4px 2px 10px;
+      padding: 0 0 12px 0;
       flex-wrap: wrap;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--line);
     }
 
     .chart-title {
@@ -247,18 +196,54 @@
       color: var(--text);
     }
 
-    .value-badge {
+    .currency-pair-select {
+      position: relative;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 7px 12px;
-      border-radius: 999px;
-      background: rgba(27, 201, 142, 0.08);
-      border: 1px solid rgba(27, 201, 142, 0.15);
-      color: var(--success);
+    }
+
+    .chart-pair-select {
+      appearance: none;
+      border: 1px solid rgba(90, 212, 255, 0.3);
+      background: rgba(9, 24, 40, 0.6);
+      color: var(--primary-2);
       font-size: 11px;
+      border-radius: 6px;
+      padding: 6px 24px 6px 10px;
+      outline: none;
+      min-width: 120px;
+      cursor: pointer;
       font-weight: 700;
       letter-spacing: 0.02em;
+      transition: all 0.2s ease;
+    }
+
+    .chart-pair-select:hover {
+      background: rgba(9, 24, 40, 0.8);
+      border-color: rgba(90, 212, 255, 0.5);
+    }
+
+    .chart-pair-select:focus {
+      background: rgba(9, 24, 40, 0.8);
+      border-color: rgba(90, 212, 255, 0.7);
+      box-shadow: 0 0 0 2px rgba(58, 160, 255, 0.1);
+    }
+
+    .chart-pair-select option {
+      background: #0d1b2a;
+      color: #edf6ff;
+      padding: 6px;
+    }
+
+    .currency-pair-select::after {
+      content: '▼';
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 9px;
+      color: rgba(90,212,255,0.6);
+      pointer-events: none;
     }
 
     .chart-toolbox {
@@ -267,39 +252,41 @@
       justify-content: space-between;
       gap: 14px;
       flex-wrap: wrap;
-      padding-bottom: 10px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 12px;
     }
 
     .meta-strip {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       flex-wrap: wrap;
-      min-height: 40px;
+      min-height: 32px;
     }
 
     .meta-chip {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 6px 10px;
+      gap: 5px;
+      padding: 5px 10px;
       border: 1px solid var(--line);
       border-radius: 999px;
       color: var(--muted);
-      font-size: 11px;
+      font-size: 10px;
       background: rgba(255,255,255,0.02);
     }
 
     .meta-chip strong {
       color: var(--text);
       font-weight: 700;
-      font-size: 12px;
+      font-size: 11px;
     }
 
     .period-picker {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
     }
 
@@ -308,9 +295,9 @@
       border: 1px solid var(--line);
       background: rgba(255,255,255,0.02);
       color: var(--muted);
-      border-radius: 8px;
-      padding: 7px 10px;
-      font-size: 11px;
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 10px;
       cursor: pointer;
       transition: all 0.2s ease;
       font-weight: 700;
@@ -331,11 +318,11 @@
     .chart-wrap {
       position: relative;
       flex: 1;
-      min-height: 280px;
+      min-height: 0;
       background: rgba(8, 17, 27, 0.8);
       border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 12px 10px 8px;
+      border-radius: 12px;
+      padding: 10px 8px 8px;
       overflow: hidden;
     }
 
@@ -360,10 +347,8 @@
     }
 
     .panel.calc {
-      display: flex;
-      flex-direction: column;
       padding: 14px;
-      min-height: 0;
+      overflow: hidden;
     }
 
     .calc-header {
@@ -373,7 +358,7 @@
       gap: 10px;
       padding-bottom: 12px;
       border-bottom: 1px solid var(--line);
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
 
     .calc-title {
@@ -386,10 +371,10 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 6px 8px;
+      padding: 5px 8px;
       font-size: 10px;
       border-radius: 999px;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.03em;
       color: var(--muted);
       background: rgba(255,255,255,0.02);
       border: 1px solid var(--line);
@@ -399,32 +384,13 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
-      min-height: 0;
-      overflow-y: auto;
-      padding-right: 4px;
-    }
-
-    .calc-body::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .calc-body::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    .calc-body::-webkit-scrollbar-thumb {
-      background: rgba(90,212,255,0.2);
-      border-radius: 3px;
-    }
-
-    .calc-body::-webkit-scrollbar-thumb:hover {
-      background: rgba(90,212,255,0.35);
+      overflow: hidden;
     }
 
     .field-group {
       display: flex;
       flex-direction: column;
-      gap: 7px;
+      gap: 6px;
     }
 
     .field-group label {
@@ -434,31 +400,65 @@
       letter-spacing: 0.03em;
     }
 
-    .number-input-wrapper {
+    .select-wrapper {
       position: relative;
-    }
-
-    .field-group input[type="number"],
-    .field-group select {
-      width: 100%;
-      border-radius: 12px;
-      border: 1px solid rgba(133, 157, 191, 0.25);
-      background: rgba(9, 17, 27, 0.7);
-      padding: 12px 14px;
-      color: var(--text);
-      font-size: 15px;
-      outline: none;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
     }
 
     .field-group select {
       appearance: none;
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid rgba(133, 157, 191, 0.25);
+      background: rgba(9, 17, 27, 0.7);
+      padding: 10px 28px 10px 12px;
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
       cursor: pointer;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
     }
 
     .field-group select option {
       background: #0d1b2a;
       color: #edf6ff;
+      padding: 8px;
+    }
+
+    .field-group select:hover {
+      border-color: rgba(58,160,255,0.5);
+    }
+
+    .field-group select:focus {
+      border-color: rgba(58,160,255,0.8);
+      box-shadow: 0 0 0 3px rgba(58,160,255,0.12);
+      transform: translateY(-1px);
+    }
+
+    .select-wrapper::after {
+      content: '▼';
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 9px;
+      color: rgba(90,212,255,0.6);
+      pointer-events: none;
+    }
+
+    .number-input-wrapper {
+      position: relative;
+    }
+
+    .field-group input[type="number"] {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid rgba(133, 157, 191, 0.25);
+      background: rgba(9, 17, 27, 0.7);
+      padding: 10px 12px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
     }
 
     .field-group input[type="number"]::-webkit-outer-spin-button,
@@ -471,11 +471,40 @@
       -moz-appearance: textfield;
     }
 
-    .field-group input[type="number"]:focus,
-    .field-group select:focus {
+    .field-group input[type="number"]:focus {
       border-color: rgba(58,160,255,0.8);
       box-shadow: 0 0 0 3px rgba(58,160,255,0.12);
       transform: translateY(-1px);
+    }
+
+    .number-input-wrapper::after,
+    .number-input-wrapper::before {
+      content: '';
+      position: absolute;
+      right: 10px;
+      width: 6px;
+      height: 6px;
+      border-style: solid;
+      pointer-events: none;
+      opacity: 0.5;
+      transition: opacity 0.2s ease;
+    }
+
+    .number-input-wrapper::before {
+      top: 7px;
+      border-width: 0 3px 4px 3px;
+      border-color: transparent transparent rgba(90, 212, 255, 0.8) transparent;
+    }
+
+    .number-input-wrapper::after {
+      bottom: 7px;
+      border-width: 4px 3px 0 3px;
+      border-color: rgba(90, 212, 255, 0.8) transparent transparent transparent;
+    }
+
+    .number-input-wrapper:hover::before,
+    .number-input-wrapper:hover::after {
+      opacity: 1;
     }
 
     .field-row {
@@ -487,8 +516,8 @@
     .result-card {
       background: linear-gradient(135deg, rgba(58,160,255,0.12), rgba(90,212,255,0.06));
       border: 1px solid rgba(90,212,255,0.18);
-      border-radius: 14px;
-      padding: 12px 12px 10px;
+      border-radius: 12px;
+      padding: 10px;
       margin-top: 2px;
     }
 
@@ -496,10 +525,10 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 6px;
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      font-size: 12px;
+      gap: 8px;
+      padding: 7px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 11px;
       color: var(--muted);
     }
 
@@ -510,24 +539,24 @@
 
     .result-line strong {
       color: var(--text);
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
     }
 
     .result-main {
-      margin-top: 10px;
-      padding-top: 10px;
+      margin-top: 8px;
+      padding-top: 8px;
       border-top: 1px solid rgba(255,255,255,0.09);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
     }
 
     .result-main strong {
-      font-size: clamp(1.5rem, 2vw, 2rem);
+      font-size: clamp(1.3rem, 2vw, 1.8rem);
       color: var(--warning);
       letter-spacing: 0.04em;
     }
@@ -536,8 +565,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 10px 12px;
-      border-radius: 12px;
+      padding: 9px 12px;
+      border-radius: 10px;
       background: rgba(255,255,255,0.02);
       border: 1px solid var(--line);
       font-size: 11px;
@@ -557,13 +586,6 @@
       color: var(--danger);
       border-color: rgba(255,92,122,0.18);
       background: rgba(255,92,122,0.06);
-    }
-
-    .note {
-      font-size: 10px;
-      color: var(--muted);
-      line-height: 1.6;
-      margin: 2px 0 0;
     }
 
     @media (max-width: 1100px) {
@@ -603,11 +625,8 @@
       }
 
       .chart-toolbox {
+        flex-direction: column;
         align-items: flex-start;
-      }
-
-      .topbar-controls {
-        justify-content: flex-start;
       }
     }
   </style>
@@ -625,16 +644,6 @@
 
       <div class="topbar-controls">
         <span class="status-pill">● LIVE</span>
-        <div class="currency-pair-wrapper">
-          <select id="currencyPair" class="ghost-select" aria-label="请选择货币对">
-            <option value="USD_CNY" selected>USD/CNY</option>
-            <option value="EUR_CNY">EUR/CNY</option>
-            <option value="GBP_CNY">GBP/CNY</option>
-            <option value="JPY_CNY">JPY/CNY</option>
-            <option value="EUR_USD">EUR/USD</option>
-            <option value="GBP_USD">GBP/USD</option>
-          </select>
-        </div>
       </div>
     </header>
 
@@ -645,7 +654,16 @@
             <span class="dot"></span>
             <h2>汇率走势</h2>
           </div>
-          <span class="value-badge" id="latestRate">加载中…</span>
+          <div class="currency-pair-select">
+            <select id="currencyPair" class="chart-pair-select" aria-label="请选择货币对">
+              <option value="USD_CNY" selected>USD/CNY</option>
+              <option value="EUR_CNY">EUR/CNY</option>
+              <option value="GBP_CNY">GBP/CNY</option>
+              <option value="JPY_CNY">JPY/CNY</option>
+              <option value="EUR_USD">EUR/USD</option>
+              <option value="GBP_USD">GBP/USD</option>
+            </select>
+          </div>
         </div>
 
         <div class="chart-toolbox">
@@ -681,23 +699,27 @@
           <div class="field-row">
             <div class="field-group">
               <label for="principalCurrency">本金货币</label>
-              <select id="principalCurrency" aria-label="选择本金货币">
-                <option value="CNY" selected>人民币 (CNY)</option>
-                <option value="USD">美元 (USD)</option>
-                <option value="EUR">欧元 (EUR)</option>
-                <option value="GBP">英镑 (GBP)</option>
-                <option value="JPY">日元 (JPY)</option>
-              </select>
+              <div class="select-wrapper">
+                <select id="principalCurrency" aria-label="选择本金货币">
+                  <option value="CNY" selected>人民币 (CNY)</option>
+                  <option value="USD">美元 (USD)</option>
+                  <option value="EUR">欧元 (EUR)</option>
+                  <option value="GBP">英镑 (GBP)</option>
+                  <option value="JPY">日元 (JPY)</option>
+                </select>
+              </div>
             </div>
             <div class="field-group">
               <label for="targetCurrency">目标货币</label>
-              <select id="targetCurrency" aria-label="选择目标货币">
-                <option value="USD" selected>美元 (USD)</option>
-                <option value="CNY">人民币 (CNY)</option>
-                <option value="EUR">欧元 (EUR)</option>
-                <option value="GBP">英镑 (GBP)</option>
-                <option value="JPY">日元 (JPY)</option>
-              </select>
+              <div class="select-wrapper">
+                <select id="targetCurrency" aria-label="选择目标货币">
+                  <option value="USD" selected>美元 (USD)</option>
+                  <option value="CNY">人民币 (CNY)</option>
+                  <option value="EUR">欧元 (EUR)</option>
+                  <option value="GBP">英镑 (GBP)</option>
+                  <option value="JPY">日元 (JPY)</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -738,13 +760,7 @@
             </div>
           </div>
 
-          <div class="status-box" id="betterOption">方案：待计算</div>
-
-          <p class="note">
-            说明：本金货币与目标货币可自由选择，图表则沿用当前货币对。<br>
-            汇率越高，说明目标货币越贵，等值本金换得的目标货币越少。<br>
-            差额 = |本金 ÷ 汇率 A − 本金 ÷ 汇率 B|
-          </p>
+          <div class="status-box" id="betterOption" style="display:none;">方案：待计算</div>
         </div>
       </aside>
     </main>
@@ -813,17 +829,7 @@
 
         resultAEl.textContent = formatCurrency(resultA, targetCurrencyEl.value);
         resultBEl.textContent = formatCurrency(resultB, targetCurrencyEl.value);
-
-        if (Math.abs(diff) < 0.001) {
-          diffEl.textContent = formatCurrency(0, targetCurrencyEl.value);
-          betterOptionEl.textContent = '方案：相同';
-          betterOptionEl.className = 'status-box';
-        } else {
-          const absDiff = Math.abs(diff);
-          diffEl.textContent = formatCurrency(absDiff, targetCurrencyEl.value);
-          betterOptionEl.textContent = diff > 0 ? '方案：A 更划算' : '方案：B 更划算';
-          betterOptionEl.className = diff > 0 ? 'status-box good' : 'status-box bad';
-        }
+        diffEl.textContent = formatCurrency(Math.abs(diff), targetCurrencyEl.value);
       }
 
       function setPeriodActive(value) {
@@ -852,7 +858,7 @@
 
         try {
           const response = await fetch(url);
-          if (!response.ok) throw new Error('网络或数据错误');
+          if (!response.ok) throw new Error('��络或数据错误');
           const data = await response.json();
 
           if (!data.rates || Object.keys(data.rates).length === 0) {
@@ -881,7 +887,6 @@
           const maxValue = Math.max(...values);
           const minValue = Math.min(...values);
 
-          latestRateEl.textContent = `1 ${pair.base} = ${latestValue.toFixed(4)} ${pair.target}`;
           metaLatestEl.textContent = latestValue.toFixed(4);
           metaOpenEl.textContent = firstValue.toFixed(4);
           metaHighEl.textContent = maxValue.toFixed(4);
