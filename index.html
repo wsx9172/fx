@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>汇率与换汇差额</title>
+  <title>FX Flow — 汇率与换汇差额</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%230b1320'/><rect x='12' y='12' width='76' height='76' rx='12' fill='none' stroke='%233aa0ff' stroke-width='4'/><text x='50' y='60' text-anchor='middle' dominant-baseline='middle' font-size='48' fill='%235ad4ff' font-weight='bold'>¥$</text></svg>" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
@@ -117,8 +117,58 @@
     .topbar-controls {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       flex-wrap: wrap;
+    }
+
+    /* ===== 语言切换器 ===== */
+    .lang-selector {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .lang-select {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      border-radius: 6px;
+      padding: 7px 26px 7px 10px;
+      cursor: pointer;
+      outline: none;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .lang-select:hover {
+      border-color: rgba(90,212,255,0.4);
+      background: rgba(90,212,255,0.06);
+    }
+
+    .lang-select:focus {
+      border-color: rgba(90,212,255,0.6);
+      box-shadow: 0 0 0 2px rgba(58, 160, 255, 0.12);
+    }
+
+    .lang-select option {
+      background: #0d1b2a;
+      color: #edf6ff;
+      padding: 6px;
+    }
+
+    .lang-selector::after {
+      content: '▾';
+      position: absolute;
+      right: 9px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 9px;
+      color: rgba(90,212,255,0.7);
+      pointer-events: none;
     }
 
     .status-pill {
@@ -612,8 +662,11 @@
     }
 
     @media (max-width: 640px) {
-      .topbar { padding: 12px 14px; }
+      .topbar { padding: 12px 14px; gap: 10px; }
       .brand-title { font-size: 1rem; }
+      .brand-label { font-size: 10px; }
+      .lang-select { font-size: 10px; padding: 6px 22px 6px 8px; }
+      .status-pill { font-size: 10px; padding: 6px 8px; }
       .workspace { padding: 10px; gap: 12px; }
       .panel { border-radius: 14px; }
       .chart-panel, .panel.calc { padding: 12px; }
@@ -632,6 +685,7 @@
       .result-main strong { font-size: 1.9rem; }
       .period-btn { padding: 4px 8px; font-size: 9px; }
       .preset-btn { font-size: 9px; padding: 2px 6px; }
+      .brand-label { display: none; }
     }
   </style>
 </head>
@@ -641,13 +695,20 @@
       <div class="brand">
         <div class="brand-mark" title="FX Flow">¥$</div>
         <div class="brand-copy">
-          <div class="brand-label">Market desk</div>
+          <div class="brand-label" data-i18n="brandLabel">Market desk</div>
           <div class="brand-title">FX Flow</div>
         </div>
       </div>
 
       <div class="topbar-controls">
-        <span class="status-pill">● LIVE</span>
+        <div class="lang-selector">
+          <select id="languageSelect" class="lang-select" aria-label="Language">
+            <option value="zh-CN">简体中文</option>
+            <option value="en">English</option>
+            <option value="ja">日本語</option>
+          </select>
+        </div>
+        <span class="status-pill">● <span data-i18n="statusLive">LIVE</span></span>
       </div>
     </header>
 
@@ -656,10 +717,10 @@
         <div class="chart-header">
           <div class="chart-title">
             <span class="dot"></span>
-            <h2>汇率走势</h2>
+            <h2 data-i18n="chartTitle">汇率走势</h2>
           </div>
           <div class="currency-pair-select">
-            <select id="currencyPair" class="chart-pair-select" aria-label="请选择货币对">
+            <select id="currencyPair" class="chart-pair-select" data-i18n-aria="pairLabel" aria-label="请选择货币对">
               <option value="USD_CNY" selected>USD/CNY</option>
               <option value="EUR_CNY">EUR/CNY</option>
               <option value="GBP_CNY">GBP/CNY</option>
@@ -672,13 +733,13 @@
 
         <div class="chart-toolbox">
           <div class="meta-strip">
-            <div class="meta-chip">最新 <strong id="metaLatest">--</strong></div>
-            <div class="meta-chip">开盘 <strong id="metaOpen">--</strong></div>
-            <div class="meta-chip">最高 <strong id="metaHigh">--</strong></div>
-            <div class="meta-chip">最低 <strong id="metaLow">--</strong></div>
+            <div class="meta-chip"><span data-i18n="metaLatest">最新</span> <strong id="metaLatest">--</strong></div>
+            <div class="meta-chip"><span data-i18n="metaOpen">开盘</span> <strong id="metaOpen">--</strong></div>
+            <div class="meta-chip"><span data-i18n="metaHigh">最高</span> <strong id="metaHigh">--</strong></div>
+            <div class="meta-chip"><span data-i18n="metaLow">最低</span> <strong id="metaLow">--</strong></div>
           </div>
 
-          <div class="period-picker" aria-label="选择时间周期">
+          <div class="period-picker" aria-label="Period">
             <button class="period-btn" data-period="7">7D</button>
             <button class="period-btn" data-period="30">1M</button>
             <button class="period-btn active" data-period="90">3M</button>
@@ -690,19 +751,20 @@
 
         <div class="chart-wrap">
           <canvas id="exchangeChart"></canvas>
-          <div class="chart-overlay" id="chartOverlay">加载中…</div>
+          <div class="chart-overlay" id="chartOverlay" data-i18n="loadingRates">加载中…</div>
         </div>
       </section>
 
       <aside class="panel calc">
         <div class="calc-header">
-          <div class="calc-title">换汇计算器</div>
+          <div class="calc-title" data-i18n="calcTitle">换汇计算器</div>
+          <span class="mini-pill" data-i18n="riskCheck">风险检测</span>
         </div>
 
         <div class="calc-body">
           <div class="field-group">
             <div class="field-label-row">
-              <label for="principal">本金</label>
+              <label for="principal" data-i18n="principal">本金</label>
               <div class="principal-presets" id="principalPresets">
                 <button type="button" class="preset-btn" data-value="100" title="100">100</button>
                 <button type="button" class="preset-btn" data-value="1000" title="1,000">1k</button>
@@ -713,36 +775,39 @@
               </div>
             </div>
             <div class="number-input-wrapper">
-              <input id="principal" type="number" value="10000" min="0" step="100" placeholder="请输入金额">
+              <input id="principal" type="number" value="10000" min="0" step="100"
+                     data-i18n-placeholder="placeholderAmount" placeholder="请输入金额">
             </div>
           </div>
 
           <div class="field-row">
             <div class="field-group">
-              <label for="rateA">汇率 A</label>
+              <label for="rateA" data-i18n="rateA">汇率 A</label>
               <div class="number-input-wrapper">
-                <input id="rateA" type="number" value="6.66" min="0.0001" step="0.0001" placeholder="例如 6.66">
+                <input id="rateA" type="number" value="6.66" min="0.0001" step="0.0001"
+                       data-i18n-placeholder="placeholderRateA" placeholder="例如 6.66">
               </div>
             </div>
             <div class="field-group">
-              <label for="rateB">汇率 B</label>
+              <label for="rateB" data-i18n="rateB">汇率 B</label>
               <div class="number-input-wrapper">
-                <input id="rateB" type="number" value="6.67" min="0.0001" step="0.0001" placeholder="例如 6.67">
+                <input id="rateB" type="number" value="6.67" min="0.0001" step="0.0001"
+                       data-i18n-placeholder="placeholderRateB" placeholder="例如 6.67">
               </div>
             </div>
           </div>
 
           <div class="result-card">
             <div class="result-line">
-              <span>按汇率 A 换得</span>
+              <span data-i18n="resultA">按汇率 A 换得</span>
               <strong id="resultA">--</strong>
             </div>
             <div class="result-line">
-              <span>按汇率 B 换得</span>
+              <span data-i18n="resultB">按汇率 B 换得</span>
               <strong id="resultB">--</strong>
             </div>
             <div class="result-main">
-              <span class="result-main-label">差额</span>
+              <span class="result-main-label" data-i18n="difference">差额</span>
               <strong id="difference">--</strong>
               <span class="result-main-hint" id="differenceHint">--</span>
             </div>
@@ -756,6 +821,122 @@
     (function () {
       'use strict';
 
+      /* ============================================================
+         多语言词典
+         - 纯文本键：直接返回字符串
+         - 动态键：值为函数，接受参数返回字符串
+         ============================================================ */
+      const i18n = {
+        'zh-CN': {
+          pageTitle: 'FX Flow — 汇率与换汇差额',
+          brandLabel: 'Market desk',
+          statusLive: 'LIVE',
+          chartTitle: '汇率走势',
+          pairLabel: '请选择货币对',
+          metaLatest: '最新',
+          metaOpen: '开盘',
+          metaHigh: '最高',
+          metaLow: '最低',
+          calcTitle: '换汇计算器',
+          riskCheck: '风险检测',
+          principal: '本金',
+          rateA: '汇率 A',
+          rateB: '汇率 B',
+          resultA: '按汇率 A 换得',
+          resultB: '按汇率 B 换得',
+          difference: '差额',
+          placeholderAmount: '请输入金额',
+          placeholderRateA: '例如 6.66',
+          placeholderRateB: '例如 6.67',
+          loadingRates: '加载汇率数据…',
+          loadFailed: '数据加载失败',
+          noRates: '暂无汇率数据',
+          noValidRates: '无有效汇率',
+          networkError: '网络或数据错误',
+          sameHint: '两种汇率换得金额相同',
+          hintA: (n) => `汇率 A 更划算，比 B 多换 ${n}`,
+          hintB: (n) => `汇率 B 更划算，比 A 多换 ${n}`
+        },
+        en: {
+          pageTitle: 'FX Flow — Exchange Rate & Conversion Difference',
+          brandLabel: 'Market desk',
+          statusLive: 'LIVE',
+          chartTitle: 'Exchange Rate Trend',
+          pairLabel: 'Select currency pair',
+          metaLatest: 'Latest',
+          metaOpen: 'Open',
+          metaHigh: 'High',
+          metaLow: 'Low',
+          calcTitle: 'Currency Converter',
+          riskCheck: 'Risk Check',
+          principal: 'Principal',
+          rateA: 'Rate A',
+          rateB: 'Rate B',
+          resultA: 'Converted at Rate A',
+          resultB: 'Converted at Rate B',
+          difference: 'Difference',
+          placeholderAmount: 'Enter amount',
+          placeholderRateA: 'e.g. 6.66',
+          placeholderRateB: 'e.g. 6.67',
+          loadingRates: 'Loading exchange rate data…',
+          loadFailed: 'Failed to load data',
+          noRates: 'No exchange rate data',
+          noValidRates: 'No valid exchange rate',
+          networkError: 'Network or data error',
+          sameHint: 'Both rates convert to the same amount',
+          hintA: (n) => `Rate A is better — converts ${n} more than B`,
+          hintB: (n) => `Rate B is better — converts ${n} more than A`
+        },
+        ja: {
+          pageTitle: 'FX Flow — 為替レートと換算差額',
+          brandLabel: 'マーケットデスク',
+          statusLive: 'LIVE',
+          chartTitle: '為替レート推移',
+          pairLabel: '通貨ペアを選択',
+          metaLatest: '最新',
+          metaOpen: '始値',
+          metaHigh: '高値',
+          metaLow: '安値',
+          calcTitle: '為替計算機',
+          riskCheck: 'リスク検出',
+          principal: '元本',
+          rateA: 'レート A',
+          rateB: 'レート B',
+          resultA: 'レート A での換算額',
+          resultB: 'レート B での換算額',
+          difference: '差額',
+          placeholderAmount: '金額を入力',
+          placeholderRateA: '例 6.66',
+          placeholderRateB: '例 6.67',
+          loadingRates: '為替データを読み込み中…',
+          loadFailed: 'データの読み込みに失敗',
+          noRates: '為替データがありません',
+          noValidRates: '有効なレートがありません',
+          networkError: 'ネットワークまたはデータエラー',
+          sameHint: '両レートの換算額は同じです',
+          hintA: (n) => `レート A が有利 — B より ${n} 多く換算`,
+          hintB: (n) => `レート B が有利 — A より ${n} 多く換算`
+        }
+      };
+
+      let currentLang = 'zh-CN';
+
+      function t(key) {
+        const dict = i18n[currentLang] || i18n['zh-CN'];
+        const v = dict[key];
+        return typeof v === 'string' ? v : (i18n['zh-CN'][key] || key);
+      }
+
+      function tf(key, ...args) {
+        const dict = i18n[currentLang] || i18n['zh-CN'];
+        const v = dict[key] !== undefined ? dict[key] : i18n['zh-CN'][key];
+        return typeof v === 'function' ? v(...args) : v;
+      }
+
+      /* ============================================================
+         DOM 引用
+         ============================================================ */
+      const languageSelectEl = document.getElementById('languageSelect');
       const currencyPairEl = document.getElementById('currencyPair');
       const principalEl = document.getElementById('principal');
       const rateAEl = document.getElementById('rateA');
@@ -787,6 +968,54 @@
       const periodButtons = Array.from(document.querySelectorAll('.period-btn'));
       let chartInstance = null;
 
+      /* ============================================================
+         语言应用
+         ============================================================ */
+      function applyLang() {
+        document.documentElement.lang = currentLang;
+        document.title = t('pageTitle');
+
+        document.querySelectorAll('[data-i18n]').forEach((el) => {
+          el.textContent = t(el.dataset.i18n);
+        });
+
+        document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => {
+          el.placeholder = t(el.dataset.i18nPlaceholder);
+        });
+
+        document.querySelectorAll('[data-i18n-aria]').forEach((el) => {
+          el.setAttribute('aria-label', t(el.dataset.i18nAria));
+        });
+
+        if (chartOverlayEl && chartOverlayEl.style.display === 'flex') {
+          // 如果当前处于加载/失败状态，同步更新提示文案
+          if (chartOverlayEl.dataset.state === 'loading') {
+            chartOverlayEl.textContent = t('loadingRates');
+          } else if (chartOverlayEl.dataset.state === 'failed') {
+            chartOverlayEl.textContent = t('loadFailed');
+          }
+        }
+
+        // 重新计算，刷新差额方向提示
+        calculate();
+      }
+
+      function detectInitialLang() {
+        try {
+          const saved = localStorage.getItem('fxflow.lang');
+          if (saved && i18n[saved]) return saved;
+        } catch (e) { /* ignore */ }
+
+        const nav = (navigator.language || 'zh-CN').toLowerCase();
+        if (nav.startsWith('zh')) return 'zh-CN';
+        if (nav.startsWith('ja')) return 'ja';
+        if (nav.startsWith('en')) return 'en';
+        return 'zh-CN';
+      }
+
+      /* ============================================================
+         工具函数
+         ============================================================ */
       function roundRate(value, decimals) {
         const factor = Math.pow(10, decimals);
         const rounded = Math.round((value + Number.EPSILON) * factor) / factor;
@@ -815,6 +1044,9 @@
         });
       }
 
+      /* ============================================================
+         计算 + 差额方向提示
+         ============================================================ */
       function calculate() {
         const principal = parseFloat(principalEl.value) || 0;
         const rateA = parseFloat(rateAEl.value) || 0;
@@ -830,17 +1062,17 @@
         if (absDiff < 0.005) {
           diffEl.textContent = '0.00';
           diffEl.style.color = 'var(--muted)';
-          diffHintEl.textContent = '两种汇率换得金额相同';
+          diffHintEl.textContent = t('sameHint');
           diffHintEl.className = 'result-main-hint';
         } else if (diff > 0) {
           diffEl.textContent = '+' + formatNumber(absDiff);
           diffEl.style.color = 'var(--success)';
-          diffHintEl.textContent = '汇率 A 更划算，比 B 多换 ' + formatNumber(absDiff);
+          diffHintEl.textContent = tf('hintA', formatNumber(absDiff));
           diffHintEl.className = 'result-main-hint positive';
         } else {
           diffEl.textContent = '−' + formatNumber(absDiff);
           diffEl.style.color = 'var(--danger)';
-          diffHintEl.textContent = '汇率 B 更划算，比 A 多换 ' + formatNumber(absDiff);
+          diffHintEl.textContent = tf('hintB', formatNumber(absDiff));
           diffHintEl.className = 'result-main-hint negative';
         }
 
@@ -868,6 +1100,9 @@
         else return date.slice(0, 4);
       }
 
+      /* ============================================================
+         拉取汇率数据 + 渲染图表
+         ============================================================ */
       async function fetchRates(options = {}) {
         const { syncRates = false } = options;
         const pairKey = currencyPairEl.value;
@@ -881,15 +1116,16 @@
         const url = `https://api.frankfurter.dev/v1/${formatDate(start)}..${formatDate(end)}?base=${pair.base}&symbols=${pair.target}`;
 
         chartOverlayEl.style.display = 'flex';
-        chartOverlayEl.textContent = '加载汇率数据…';
+        chartOverlayEl.dataset.state = 'loading';
+        chartOverlayEl.textContent = t('loadingRates');
 
         try {
           const response = await fetch(url);
-          if (!response.ok) throw new Error('网络或数据错误');
+          if (!response.ok) throw new Error(t('networkError'));
           const data = await response.json();
 
           if (!data.rates || Object.keys(data.rates).length === 0) {
-            throw new Error('暂无汇率数据');
+            throw new Error(t('noRates'));
           }
 
           const labels = [];
@@ -903,7 +1139,7 @@
             }
           });
 
-          if (!values.length) throw new Error('无有效汇率');
+          if (!values.length) throw new Error(t('noValidRates'));
 
           renderChart(labels, values, pairKey);
 
@@ -917,6 +1153,7 @@
           metaHighEl.textContent = maxValue.toFixed(4);
           metaLowEl.textContent = minValue.toFixed(4);
           chartOverlayEl.style.display = 'none';
+          chartOverlayEl.dataset.state = '';
 
           if (syncRates) {
             const formatted = formatRateForInput(latestValue);
@@ -926,7 +1163,8 @@
           }
         } catch (err) {
           console.error(err);
-          chartOverlayEl.textContent = '数据加载失败';
+          chartOverlayEl.textContent = t('loadFailed');
+          chartOverlayEl.dataset.state = 'failed';
           chartOverlayEl.style.display = 'flex';
         }
       }
@@ -1015,6 +1253,9 @@
         });
       }
 
+      /* ============================================================
+         数字输入框箭头：点击 + 长按连续
+         ============================================================ */
       const ARROW_ZONE = 30;
       const HOLD_DELAY = 350;
       const HOLD_SPEED = 60;
@@ -1085,11 +1326,23 @@
         wrapper.addEventListener('pointerleave', stopHold);
       });
 
+      /* ============================================================
+         本金推荐按钮
+         ============================================================ */
       presetButtons.forEach((btn) => {
         btn.addEventListener('click', () => {
           principalEl.value = btn.dataset.value;
           principalEl.dispatchEvent(new Event('input', { bubbles: true }));
         });
+      });
+
+      /* ============================================================
+         事件绑定
+         ============================================================ */
+      languageSelectEl.addEventListener('change', () => {
+        currentLang = languageSelectEl.value;
+        try { localStorage.setItem('fxflow.lang', currentLang); } catch (e) { /* ignore */ }
+        applyLang();
       });
 
       currencyPairEl.addEventListener('change', function () {
@@ -1107,7 +1360,13 @@
         });
       });
 
-      calculate();
+      /* ============================================================
+         初始化
+         ============================================================ */
+      currentLang = detectInitialLang();
+      languageSelectEl.value = currentLang;
+      applyLang();
+
       setPeriodActive(90);
       fetchRates({ syncRates: true });
     })();
