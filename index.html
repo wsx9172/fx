@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FX Flow — 汇率与换汇差额</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%230b1320'/><rect x='12' y='12' width='76' height='76' rx='16' fill='%230d2b4d'/><text x='50' y='64' font-size='46' font-weight='700' text-anchor='middle' fill='%23d9efff' font-family='Arial, sans-serif'>¥$</text></svg>">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%230b1320'/><rect x='12' y='12' width='76' height='76' rx='12' fill='none' stroke='%233aa0ff' stroke-width='4'/><text x='50' y='60' text-anchor='middle' dominant-baseline='middle' font-size='48' fill='%235ad4ff' font-weight='bold'>¥$</text></svg>" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     :root {
@@ -438,7 +438,8 @@
       position: relative;
     }
 
-    .field-group input[type="number"] {
+    .field-group input[type="number"],
+    .field-group select {
       width: 100%;
       border-radius: 12px;
       border: 1px solid rgba(133, 157, 191, 0.25);
@@ -450,7 +451,16 @@
       transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
     }
 
-    /* 隐藏默认的上下调整箭头 */
+    .field-group select {
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .field-group select option {
+      background: #0d1b2a;
+      color: #edf6ff;
+    }
+
     .field-group input[type="number"]::-webkit-outer-spin-button,
     .field-group input[type="number"]::-webkit-inner-spin-button {
       -webkit-appearance: none;
@@ -461,34 +471,11 @@
       -moz-appearance: textfield;
     }
 
-    .field-group input[type="number"]:focus {
+    .field-group input[type="number"]:focus,
+    .field-group select:focus {
       border-color: rgba(58,160,255,0.8);
       box-shadow: 0 0 0 3px rgba(58,160,255,0.12);
       transform: translateY(-1px);
-    }
-
-    /* 自定义调整按钮 */
-    .number-input-wrapper::after,
-    .number-input-wrapper::before {
-      content: '';
-      position: absolute;
-      right: 10px;
-      width: 0;
-      height: 0;
-      border-left: 5px solid transparent;
-      border-right: 5px solid transparent;
-      pointer-events: none;
-      cursor: pointer;
-    }
-
-    .number-input-wrapper::before {
-      top: 8px;
-      border-bottom: 6px solid rgba(90, 212, 255, 0.6);
-    }
-
-    .number-input-wrapper::after {
-      bottom: 8px;
-      border-top: 6px solid rgba(90, 212, 255, 0.6);
     }
 
     .field-row {
@@ -670,10 +657,9 @@
           </div>
 
           <div class="period-picker" aria-label="选择时间周期">
-            <button class="period-btn" data-period="1">1D</button>
             <button class="period-btn" data-period="7">7D</button>
-            <button class="period-btn active" data-period="30">1M</button>
-            <button class="period-btn" data-period="90">3M</button>
+            <button class="period-btn" data-period="30">1M</button>
+            <button class="period-btn active" data-period="90">3M</button>
             <button class="period-btn" data-period="365">1Y</button>
             <button class="period-btn" data-period="1825">5Y</button>
           </div>
@@ -692,6 +678,29 @@
         </div>
 
         <div class="calc-body">
+          <div class="field-row">
+            <div class="field-group">
+              <label for="principalCurrency">本金货币</label>
+              <select id="principalCurrency" aria-label="选择本金货币">
+                <option value="CNY" selected>人民币 (CNY)</option>
+                <option value="USD">美元 (USD)</option>
+                <option value="EUR">欧元 (EUR)</option>
+                <option value="GBP">英镑 (GBP)</option>
+                <option value="JPY">日元 (JPY)</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label for="targetCurrency">目标货币</label>
+              <select id="targetCurrency" aria-label="选择目标货币">
+                <option value="USD" selected>美元 (USD)</option>
+                <option value="CNY">人民币 (CNY)</option>
+                <option value="EUR">欧元 (EUR)</option>
+                <option value="GBP">英镑 (GBP)</option>
+                <option value="JPY">日元 (JPY)</option>
+              </select>
+            </div>
+          </div>
+
           <div class="field-group">
             <label for="principal">本金</label>
             <div class="number-input-wrapper">
@@ -717,22 +726,23 @@
           <div class="result-card">
             <div class="result-line">
               <span>按汇率 A 换得</span>
-              <strong id="resultA">$0.00</strong>
+              <strong id="resultA">--</strong>
             </div>
             <div class="result-line">
               <span>按汇率 B 换得</span>
-              <strong id="resultB">$0.00</strong>
+              <strong id="resultB">--</strong>
             </div>
             <div class="result-main">
               <span>差额</span>
-              <strong id="difference">$0.00</strong>
+              <strong id="difference">--</strong>
             </div>
           </div>
 
           <div class="status-box" id="betterOption">方案：待计算</div>
 
           <p class="note">
-            说明：汇率越高，说明目标货币越贵，等值人民币换得的目标货币越少。<br>
+            说明：本金货币与目标货币可自由选择，图表则沿用当前货币对。<br>
+            汇率越高，说明目标货币越贵，等值本金换得的目标货币越少。<br>
             差额 = |本金 ÷ 汇率 A − 本金 ÷ 汇率 B|
           </p>
         </div>
@@ -745,6 +755,8 @@
       'use strict';
 
       const currencyPairEl = document.getElementById('currencyPair');
+      const principalCurrencyEl = document.getElementById('principalCurrency');
+      const targetCurrencyEl = document.getElementById('targetCurrency');
       const principalEl = document.getElementById('principal');
       const rateAEl = document.getElementById('rateA');
       const rateBEl = document.getElementById('rateB');
@@ -768,38 +780,47 @@
         GBP_USD: { base: 'GBP', target: 'USD', label: 'GBP/USD', symbol: '$' }
       };
 
+      const currencySymbols = {
+        CNY: '¥',
+        USD: '$',
+        EUR: '€',
+        GBP: '£',
+        JPY: '¥'
+      };
+
       const periodButtons = Array.from(document.querySelectorAll('.period-btn'));
       let chartInstance = null;
 
-      function formatCurrency(value, pairKey = currencyPairEl.value) {
-        const pair = currencyMap[pairKey] || currencyMap.USD_CNY;
-        const target = pair.target;
-        const symbol = target === 'CNY' ? '¥' : target === 'USD' ? '$' : target;
+      function formatCurrency(value, currency = targetCurrencyEl.value || 'USD') {
+        const symbol = currencySymbols[currency] || currency;
         return symbol + Number(value || 0).toFixed(2);
+      }
+
+      function formatDateLabel(date, days) {
+        if (days <= 90) {
+          return date.slice(5);
+        }
+        return date.slice(0, 7);
       }
 
       function calculate() {
         const principal = parseFloat(principalEl.value) || 0;
         const rateA = parseFloat(rateAEl.value) || 0;
         const rateB = parseFloat(rateBEl.value) || 0;
+        const resultA = rateA > 0 ? principal / rateA : 0;
+        const resultB = rateB > 0 ? principal / rateB : 0;
+        const diff = resultA - resultB;
 
-        const usdA = rateA > 0 ? principal / rateA : 0;
-        const usdB = rateB > 0 ? principal / rateB : 0;
-        const diff = usdA - usdB;
-
-        const pairKey = currencyPairEl.value;
-        resultAEl.textContent = formatCurrency(usdA, pairKey);
-        resultBEl.textContent = formatCurrency(usdB, pairKey);
+        resultAEl.textContent = formatCurrency(resultA, targetCurrencyEl.value);
+        resultBEl.textContent = formatCurrency(resultB, targetCurrencyEl.value);
 
         if (Math.abs(diff) < 0.001) {
-          diffEl.textContent = formatCurrency(0, pairKey);
-          diffEl.className = 'result-main-value';
+          diffEl.textContent = formatCurrency(0, targetCurrencyEl.value);
           betterOptionEl.textContent = '方案：相同';
           betterOptionEl.className = 'status-box';
         } else {
           const absDiff = Math.abs(diff);
-          diffEl.textContent = formatCurrency(absDiff, pairKey);
-          diffEl.className = diff > 0 ? 'positive' : 'negative';
+          diffEl.textContent = formatCurrency(absDiff, targetCurrencyEl.value);
           betterOptionEl.textContent = diff > 0 ? '方案：A 更划算' : '方案：B 更划算';
           betterOptionEl.className = diff > 0 ? 'status-box good' : 'status-box bad';
         }
@@ -818,7 +839,7 @@
       async function fetchRates() {
         const pairKey = currencyPairEl.value;
         const pair = currencyMap[pairKey];
-        const days = Number(document.querySelector('.period-btn.active')?.dataset.period || 30);
+        const days = Number(document.querySelector('.period-btn.active')?.dataset.period || 90);
         const end = new Date();
         end.setHours(0, 0, 0, 0);
         const start = new Date(end);
@@ -844,7 +865,7 @@
           Object.keys(data.rates).sort().forEach((date) => {
             const value = data.rates[date]?.[pair.target];
             if (value) {
-              labels.push(date.slice(5));
+              labels.push(formatDateLabel(date, days));
               values.push(value);
             }
           });
@@ -980,6 +1001,8 @@
         calculate();
       });
 
+      principalCurrencyEl.addEventListener('change', calculate);
+      targetCurrencyEl.addEventListener('change', calculate);
       principalEl.addEventListener('input', calculate);
       rateAEl.addEventListener('input', calculate);
       rateBEl.addEventListener('input', calculate);
@@ -992,7 +1015,7 @@
       });
 
       calculate();
-      setPeriodActive(30);
+      setPeriodActive(90);
       fetchRates();
     })();
   </script>
