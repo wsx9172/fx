@@ -3,374 +3,123 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>人民币美元换汇差额计算器</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%232c6bed'/><text x='50' y='65' font-size='60' font-weight='bold' text-anchor='middle' fill='white' font-family='system-ui'>¥$</text></svg>">
+  <title>FX Flow — 汇率与换汇差额</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%230b1320'/><rect x='12' y='12' width='76' height='76' rx='16' fill='%230d2b4d'/><text x='50' y='64' font-size='46' font-weight='700' text-anchor='middle' fill='%23d9efff' font-family='Arial, sans-serif'>¥$</text></svg>">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     :root {
-      --bg: #f3f6fb;
-      --panel: #ffffff;
-      --panel-soft: #f7f9fc;
-      --line: #e8edf5;
-      --text: #1d2433;
-      --muted: #5d6879;
-      --primary: #2c6bed;
-      --primary-2: #5b8cff;
-      --good: #1f9d61;
-      --bad: #df5d5d;
-      --gold: #f4ba43;
-      --shadow: 0 18px 45px rgba(18, 33, 61, 0.08);
+      --bg: #071521;
+      --bg-2: #0d1b2a;
+      --panel: rgba(13, 27, 42, 0.92);
+      --panel-strong: rgba(18, 34, 52, 0.95);
+      --panel-alt: rgba(14, 25, 38, 0.9);
+      --muted: #8aa0b7;
+      --text: #edf6ff;
+      --line: rgba(150, 175, 212, 0.2);
+      --primary: #3aa0ff;
+      --primary-2: #5ad4ff;
+      --success: #1bc98e;
+      --danger: #ff5c7a;
+      --warning: #f6c453;
+      --shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
     }
 
     * { box-sizing: border-box; }
 
     html, body {
       margin: 0;
+      width: 100%;
       height: 100%;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background: linear-gradient(180deg, #eef3ff 0%, var(--bg) 100%);
+      background:
+        radial-gradient(circle at top left, rgba(58,160,255,0.12), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(90,212,255,0.08), transparent 30%),
+        var(--bg);
       color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       overflow: hidden;
     }
 
     body {
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: stretch;
       padding: 0;
     }
 
-    .container {
+    .page {
       width: 100%;
-      height: 100%;
-      background: var(--panel);
+      height: 100vh;
+      max-width: 1600px;
       display: flex;
       flex-direction: column;
-      border: none;
-      border-radius: 0;
-      box-shadow: none;
-      overflow: hidden;
+      background: rgba(5, 14, 22, 0.8);
+      border-left: 1px solid var(--line);
+      border-right: 1px solid var(--line);
     }
 
     .topbar {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      gap: 12px;
+      justify-content: space-between;
+      gap: 18px;
       padding: 14px 20px 12px;
-      background: linear-gradient(135deg, rgba(44,107,237,0.06), rgba(91,140,255,0.02));
       border-bottom: 1px solid var(--line);
+      background: rgba(11, 19, 32, 0.95);
+      backdrop-filter: blur(8px);
       flex-shrink: 0;
     }
 
-    .title-wrap {
+    .brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
+      min-width: 0;
     }
 
-    .title-wrap .icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      display: grid;
-      place-items: center;
-      font-size: 18px;
-      background: linear-gradient(135deg, var(--primary), var(--primary-2));
-      color: white;
-      box-shadow: 0 8px 16px rgba(44,107,237,0.24);
-      font-weight: bold;
-      letter-spacing: -1px;
-      transition: transform 0.2s, box-shadow 0.2s;
-      cursor: pointer;
-    }
-
-    .title-wrap .icon:hover {
-      transform: scale(1.08) rotate(5deg);
-      box-shadow: 0 12px 24px rgba(44,107,237,0.32);
-    }
-
-    h1 {
-      margin: 0;
-      font-size: clamp(1.1rem, 1.8vw, 1.4rem);
-      letter-spacing: 0.02em;
-    }
-
-    .badge {
-      background: rgba(31,157,97,0.12);
-      color: var(--good);
-      border: 1px solid rgba(31,157,97,0.18);
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 600;
-      padding: 6px 10px;
-      white-space: nowrap;
-    }
-
-    .content {
-      display: grid;
-      grid-template-columns: 1fr 0.75fr;
-      gap: 14px;
-      padding: 14px;
-      background: linear-gradient(180deg, rgba(247,249,252,0.65), #fff);
-      flex: 1;
-      overflow: hidden;
-    }
-
-    .panel {
-      background: var(--panel-soft);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .chart-panel {
-      margin-bottom: 0;
-    }
-
-    .chart-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
-      flex-wrap: wrap;
-    }
-
-    .chart-header h2 {
-      margin: 0;
-      font-size: 0.95rem;
-      color: var(--muted);
-      font-weight: 600;
-    }
-
-    .chart-controls {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
-    .control-group {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-    }
-
-    .control-group label {
-      font-size: 11px;
-      color: var(--muted);
-      font-weight: 600;
-      white-space: nowrap;
-    }
-
-    select {
-      padding: 6px 10px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: white;
-      color: var(--text);
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      min-width: 120px;
-    }
-
-    select:hover {
-      border-color: rgba(44,107,237,0.5);
-    }
-
-    select:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(44,107,237,0.1);
-    }
-
-    .rate-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: rgba(31,157,97,0.1);
-      color: var(--good);
-      border: 1px solid rgba(31,157,97,0.1);
-      font-size: 11px;
-      font-weight: 700;
-    }
-
-    .chart-box {
-      position: relative;
-      flex: 1;
+    .brand-mark {
+      width: 38px;
+      height: 38px;
       border-radius: 12px;
-      overflow: hidden;
-      background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(228,236,255,0.3));
-      border: 1px solid rgba(95, 120, 170, 0.15);
-      padding: 10px;
-      min-height: 200px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, rgba(58,160,255,0.25), rgba(90,212,255,0.18));
+      border: 1px solid rgba(90,212,255,0.2);
+      box-shadow: 0 10px 24px rgba(58,160,255,0.2);
+      font-size: 18px;
+      font-weight: 700;
+      color: #dff6ff;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .chart-container {
-      width: 100%;
-      height: 100%;
-      position: relative;
+    .brand-mark:hover {
+      transform: translateY(-1px) scale(1.04);
+      box-shadow: 0 14px 28px rgba(58,160,255,0.26);
     }
 
-    #exchangeChart {
-      width: 100%;
-      height: 100%;
+    .brand-copy {
+      min-width: 0;
     }
 
-    .chart-tooltip {
-      position: absolute;
-      background: rgba(29, 36, 51, 0.95);
-      color: white;
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-size: 11px;
-      pointer-events: none;
-      z-index: 100;
-      border: 1px solid rgba(44, 107, 237, 0.3);
-      display: none;
+    .brand-label {
+      white-space: nowrap;
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 2px;
+    }
+
+    .brand-title {
+      font-size: clamp(1rem, 1.8vw, 1.4rem);
+      font-weight: 700;
+      letter-spacing: 0.04em;
       white-space: nowrap;
     }
 
-    .chart-loading {
-      position: absolute;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      color: var(--muted);
-      font-size: 13px;
-      text-align: center;
-      padding: 20px;
-      background: rgba(255,255,255,0.5);
-      backdrop-filter: blur(4px);
-    }
-
-    form {
-      display: grid;
-      gap: 10px;
-    }
-
-    .field-group {
-      display: grid;
-      gap: 5px;
-    }
-
-    .field-group label {
-      font-size: 11px;
-      color: var(--muted);
-      font-weight: 700;
-      letter-spacing: 0.02em;
-    }
-
-    .field-group input {
-      width: 100%;
-      border: 1.5px solid var(--line);
-      background: #fff;
-      border-radius: 10px;
-      font-size: 13px;
-      color: var(--text);
-      padding: 10px 12px;
-      outline: none;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .field-group input:focus {
-      border-color: rgba(44,107,237,0.8);
-      box-shadow: 0 0 0 3px rgba(44,107,237,0.1);
-    }
-
-    .row {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-    }
-
-    .result-panel {
-      display: grid;
-      gap: 10px;
-      align-content: start;
-      overflow-y: auto;
-      max-height: 100%;
-    }
-
-    .result-panel::-webkit-scrollbar {
-      width: 5px;
-    }
-
-    .result-panel::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    .result-panel::-webkit-scrollbar-thumb {
-      background: rgba(44, 107, 237, 0.3);
-      border-radius: 3px;
-    }
-
-    .result-panel::-webkit-scrollbar-thumb:hover {
-      background: rgba(44, 107, 237, 0.5);
-    }
-
-    .summary-card {
-      background: linear-gradient(135deg, #2c6bed 0%, #5b8cff 100%);
-      border-radius: 14px;
-      padding: 14px;
-      color: white;
-      box-shadow: 0 12px 20px rgba(44,107,237,0.2);
-    }
-
-    .summary-card h3 {
-      margin: 0 0 10px;
-      font-size: 0.85rem;
-      opacity: 0.9;
-      font-weight: 600;
-    }
-
-    .result-item {
+    .topbar-controls {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      gap: 10px;
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.12);
-      font-size: 13px;
-    }
-
-    .result-item:last-child {
-      border-bottom: none;
-    }
-
-    .result-item strong {
-      font-size: 0.95rem;
-      font-weight: 700;
-    }
-
-    .result-total {
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px solid rgba(255,255,255,0.12);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .result-total strong {
-      font-size: clamp(1.2rem, 1.8vw, 1.6rem);
-      color: #fbe29d;
-    }
-
-    .status-row {
-      display: flex;
-      gap: 8px;
+      gap: 12px;
       flex-wrap: wrap;
     }
 
@@ -379,202 +128,525 @@
       align-items: center;
       gap: 6px;
       padding: 7px 10px;
-      background: rgba(44,107,237,0.08);
       border-radius: 999px;
+      background: rgba(27, 201, 142, 0.1);
+      border: 1px solid rgba(27, 201, 142, 0.2);
+      color: var(--success);
       font-size: 11px;
-      color: var(--primary);
       font-weight: 700;
-      border: 1px solid rgba(44,107,237,0.08);
+      letter-spacing: 0.03em;
     }
 
-    .status-pill.good {
-      background: rgba(31,157,97,0.08);
-      color: var(--good);
-      border-color: rgba(31,157,97,0.12);
+    .ghost-select {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.02);
+      color: var(--text);
+      font-size: 11px;
+      border-radius: 8px;
+      padding: 8px 30px 8px 10px;
+      outline: none;
+      min-width: 120px;
+      background-image:
+        linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+        linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+      background-position:
+        calc(100% - 16px) calc(50% - 2px),
+        calc(100% - 11px) calc(50% - 2px);
+      background-size: 5px 5px, 5px 5px;
+      background-repeat: no-repeat;
+      cursor: pointer;
     }
 
-    .status-pill.bad {
-      background: rgba(223,93,93,0.08);
-      color: var(--bad);
-      border-color: rgba(223,93,93,0.12);
+    .workspace {
+      flex: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1.8fr) minmax(340px, 0.85fr);
+      gap: 14px;
+      padding: 14px;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(17,31,47,0.9), rgba(10,18,28,0.95));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .chart-panel {
+      display: flex;
+      flex-direction: column;
+      padding: 14px 14px 10px;
+      min-height: 0;
+    }
+
+    .chart-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 4px 2px 10px;
+      flex-wrap: wrap;
+    }
+
+    .chart-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-2), var(--primary));
+      box-shadow: 0 0 18px rgba(58,160,255,0.8);
+    }
+
+    .chart-title h2 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: var(--text);
+    }
+
+    .value-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(27, 201, 142, 0.08);
+      border: 1px solid rgba(27, 201, 142, 0.15);
+      color: var(--success);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .chart-toolbox {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      padding-bottom: 10px;
+    }
+
+    .meta-strip {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      min-height: 40px;
+    }
+
+    .meta-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 11px;
+      background: rgba(255,255,255,0.02);
+    }
+
+    .meta-chip strong {
+      color: var(--text);
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .period-picker {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .period-btn {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.02);
+      color: var(--muted);
+      border-radius: 8px;
+      padding: 7px 10px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-weight: 700;
+    }
+
+    .period-btn.active {
+      background: linear-gradient(135deg, rgba(58,160,255,0.18), rgba(90,212,255,0.08));
+      border-color: rgba(90,212,255,0.35);
+      color: var(--text);
+      box-shadow: inset 0 0 0 1px rgba(90,212,255,0.08);
+    }
+
+    .period-btn:hover {
+      border-color: rgba(90,212,255,0.25);
+      color: var(--text);
+    }
+
+    .chart-wrap {
+      position: relative;
+      flex: 1;
+      min-height: 280px;
+      background: rgba(8, 17, 27, 0.8);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 10px 8px;
+      overflow: hidden;
+    }
+
+    #exchangeChart {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .chart-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(8,17,27,0.18);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+      padding: 18px;
+      pointer-events: none;
+    }
+
+    .panel.calc {
+      display: flex;
+      flex-direction: column;
+      padding: 14px;
+      min-height: 0;
+    }
+
+    .calc-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 12px;
+    }
+
+    .calc-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .mini-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 8px;
+      font-size: 10px;
+      border-radius: 999px;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--line);
+    }
+
+    .calc-body {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .field-group label {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+
+    .field-group input {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid rgba(133, 157, 191, 0.25);
+      background: rgba(9, 17, 27, 0.7);
+      padding: 12px 14px;
+      color: var(--text);
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .field-group input:focus {
+      border-color: rgba(58,160,255,0.8);
+      box-shadow: 0 0 0 3px rgba(58,160,255,0.12);
+      transform: translateY(-1px);
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .result-card {
+      background: linear-gradient(135deg, rgba(58,160,255,0.12), rgba(90,212,255,0.06));
+      border: 1px solid rgba(90,212,255,0.18);
+      border-radius: 14px;
+      padding: 12px 12px 10px;
+      margin-top: 2px;
+    }
+
+    .result-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .result-line:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .result-line strong {
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .result-main {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255,255,255,0.09);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .result-main strong {
+      font-size: clamp(1.5rem, 2vw, 2rem);
+      color: var(--warning);
+      letter-spacing: 0.04em;
+    }
+
+    .status-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--line);
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-align: center;
+    }
+
+    .status-box.good {
+      color: var(--success);
+      border-color: rgba(27,201,142,0.18);
+      background: rgba(27,201,142,0.06);
+    }
+
+    .status-box.bad {
+      color: var(--danger);
+      border-color: rgba(255,92,122,0.18);
+      background: rgba(255,92,122,0.06);
     }
 
     .note {
-      margin: 0;
-      color: var(--muted);
       font-size: 10px;
-      line-height: 1.5;
-      padding: 2px 0;
+      color: var(--muted);
+      line-height: 1.6;
+      margin: 2px 0 0;
     }
 
-    .value-positive {
-      color: #d9f9eb;
-    }
-
-    .value-negative {
-      color: #ffe1e1;
-    }
-
-    @media (max-width: 1200px) {
-      .content {
+    @media (max-width: 1100px) {
+      .workspace {
         grid-template-columns: 1fr;
       }
 
-      .result-panel {
-        max-height: 250px;
+      .page {
+        height: auto;
+        min-height: 100vh;
+      }
+
+      body {
+        overflow: auto;
       }
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 640px) {
       .topbar {
-        padding: 10px 14px;
+        padding: 12px 14px;
       }
 
-      h1 {
+      .brand-title {
         font-size: 1rem;
       }
 
-      .content {
+      .workspace {
         padding: 10px;
-        gap: 10px;
       }
 
-      .panel {
-        padding: 10px;
-        gap: 8px;
+      .field-row {
+        grid-template-columns: 1fr;
       }
 
-      .chart-controls {
-        flex-direction: column;
-        align-items: stretch;
+      .chart-header {
+        align-items: flex-start;
       }
 
-      .control-group {
-        flex-direction: column;
+      .chart-toolbox {
+        align-items: flex-start;
       }
 
-      select {
-        width: 100%;
-        min-width: auto;
-      }
-
-      .row {
-        gap: 8px;
-      }
-
-      form {
-        gap: 8px;
+      .topbar-controls {
+        justify-content: flex-start;
       }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="topbar">
-      <div class="title-wrap">
-        <div class="icon" title="人民币美元换汇差额计算器">¥$</div>
-        <h1>换汇差额计算器</h1>
+  <div class="page">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" title="FX Flow">¥$</div>
+        <div class="brand-copy">
+          <div class="brand-label">Market desk</div>
+          <div class="brand-title">FX Flow</div>
+        </div>
       </div>
-      <span class="badge">📡 实时汇率</span>
-    </div>
 
-    <div class="content">
-      <div>
-        <div class="panel chart-panel">
-          <div class="chart-header">
-            <h2>📈 汇率走势</h2>
-            <span class="rate-badge" id="latestRate">加载中…</span>
+      <div class="topbar-controls">
+        <span class="status-pill">● LIVE</span>
+        <select id="currencyPair" class="ghost-select" aria-label="请选择货币对">
+          <option value="USD_CNY" selected>USD/CNY</option>
+          <option value="EUR_CNY">EUR/CNY</option>
+          <option value="GBP_CNY">GBP/CNY</option>
+          <option value="JPY_CNY">JPY/CNY</option>
+          <option value="EUR_USD">EUR/USD</option>
+          <option value="GBP_USD">GBP/USD</option>
+        </select>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="panel chart-panel">
+        <div class="chart-header">
+          <div class="chart-title">
+            <span class="dot"></span>
+            <h2>汇率走势</h2>
+          </div>
+          <span class="value-badge" id="latestRate">加载中…</span>
+        </div>
+
+        <div class="chart-toolbox">
+          <div class="meta-strip">
+            <div class="meta-chip">最新 <strong id="metaLatest">--</strong></div>
+            <div class="meta-chip">开盘 <strong id="metaOpen">--</strong></div>
+            <div class="meta-chip">最高 <strong id="metaHigh">--</strong></div>
+            <div class="meta-chip">最低 <strong id="metaLow">--</strong></div>
           </div>
 
-          <div class="chart-controls">
-            <div class="control-group">
-              <label for="currencyPair">货币对</label>
-              <select id="currencyPair">
-                <option value="USD_CNY" selected>美元/人民币</option>
-                <option value="EUR_CNY">欧元/人民币</option>
-                <option value="GBP_CNY">英镑/人民币</option>
-                <option value="JPY_CNY">日元/人民币</option>
-                <option value="EUR_USD">欧元/美元</option>
-                <option value="GBP_USD">英镑/美元</option>
-              </select>
-            </div>
-            <div class="control-group">
-              <label for="timePeriod">周期</label>
-              <select id="timePeriod">
-                <option value="1">1 日</option>
-                <option value="7">7 日</option>
-                <option value="30" selected>30 日</option>
-                <option value="90">3 月</option>
-                <option value="365">1 年</option>
-                <option value="1825">5 年</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="chart-box">
-            <div class="chart-container">
-              <canvas id="exchangeChart"></canvas>
-              <div class="chart-tooltip" id="chartTooltip"></div>
-            </div>
-            <div class="chart-loading" id="chartLoading">正在加载数据…</div>
+          <div class="period-picker" aria-label="选择时间周期">
+            <button class="period-btn" data-period="1">1D</button>
+            <button class="period-btn" data-period="7">7D</button>
+            <button class="period-btn active" data-period="30">1M</button>
+            <button class="period-btn" data-period="90">3M</button>
+            <button class="period-btn" data-period="365">1Y</button>
+            <button class="period-btn" data-period="1825">5Y</button>
           </div>
         </div>
 
-        <form style="margin-top: 10px;">
+        <div class="chart-wrap">
+          <canvas id="exchangeChart"></canvas>
+          <div class="chart-overlay" id="chartOverlay">加载中…</div>
+        </div>
+      </section>
+
+      <aside class="panel calc">
+        <div class="calc-header">
+          <div class="calc-title">换汇计算器</div>
+          <span class="mini-pill">风险检测</span>
+        </div>
+
+        <div class="calc-body">
           <div class="field-group">
             <label for="principal">本金</label>
-            <input type="number" id="principal" value="10000" min="0" step="100" placeholder="金额">
+            <input id="principal" type="number" value="10000" min="0" step="100" placeholder="请输入金额">
           </div>
 
-          <div class="row">
+          <div class="field-row">
             <div class="field-group">
               <label for="rateA">汇率 A</label>
-              <input type="number" id="rateA" value="6.66" min="0.01" step="0.01" placeholder="汇率">
+              <input id="rateA" type="number" value="6.66" min="0.01" step="0.01" placeholder="例如 6.66">
             </div>
             <div class="field-group">
               <label for="rateB">汇率 B</label>
-              <input type="number" id="rateB" value="6.67" min="0.01" step="0.01" placeholder="汇率">
+              <input id="rateB" type="number" value="6.67" min="0.01" step="0.01" placeholder="例如 6.67">
             </div>
           </div>
-        </form>
-      </div>
 
-      <div class="result-panel">
-        <div class="summary-card">
-          <h3>💰 换汇结果</h3>
-
-          <div class="result-item">
-            <span>汇率 A</span>
-            <strong id="resultA">$0.00</strong>
+          <div class="result-card">
+            <div class="result-line">
+              <span>按汇率 A 换得</span>
+              <strong id="resultA">$0.00</strong>
+            </div>
+            <div class="result-line">
+              <span>按汇率 B 换得</span>
+              <strong id="resultB">$0.00</strong>
+            </div>
+            <div class="result-main">
+              <span>差额</span>
+              <strong id="difference">$0.00</strong>
+            </div>
           </div>
 
-          <div class="result-item">
-            <span>汇率 B</span>
-            <strong id="resultB">$0.00</strong>
-          </div>
+          <div class="status-box" id="betterOption">方案：待计算</div>
 
-          <div class="result-total">
-            <span>差额</span>
-            <strong id="difference">$0.00</strong>
-          </div>
+          <p class="note">
+            说明：汇率越高，说明目标货币越贵，等值人民币换得的目标货币越少。<br>
+            差额 = |本金 ÷ 汇率 A − 本金 ÷ 汇率 B|
+          </p>
         </div>
-
-        <div class="status-row">
-          <span class="status-pill" id="betterOption">方案：待计算</span>
-        </div>
-
-        <p class="note">
-          <strong>说明：</strong>汇率越大，目标货币越贵；换得越少。<br>
-          <strong>公式：</strong>目标货币 = 源货币 ÷ 汇率。
-        </p>
-      </div>
-    </div>
+      </aside>
+    </main>
   </div>
 
   <script>
     (function () {
       'use strict';
 
+      const currencyPairEl = document.getElementById('currencyPair');
       const principalEl = document.getElementById('principal');
       const rateAEl = document.getElementById('rateA');
       const rateBEl = document.getElementById('rateB');
@@ -582,25 +654,28 @@
       const resultBEl = document.getElementById('resultB');
       const diffEl = document.getElementById('difference');
       const betterOptionEl = document.getElementById('betterOption');
-      const currencyPairEl = document.getElementById('currencyPair');
-      const timePeriodEl = document.getElementById('timePeriod');
-      const chartLoadingEl = document.getElementById('chartLoading');
       const latestRateEl = document.getElementById('latestRate');
-      const chartTooltipEl = document.getElementById('chartTooltip');
-
-      let chartInstance = null;
+      const metaLatestEl = document.getElementById('metaLatest');
+      const metaOpenEl = document.getElementById('metaOpen');
+      const metaHighEl = document.getElementById('metaHigh');
+      const metaLowEl = document.getElementById('metaLow');
+      const chartOverlayEl = document.getElementById('chartOverlay');
 
       const currencyMap = {
-        USD_CNY: { base: 'USD', target: 'CNY', name: 'USD/CNY', symbol: '$' },
-        EUR_CNY: { base: 'EUR', target: 'CNY', name: 'EUR/CNY', symbol: '€' },
-        GBP_CNY: { base: 'GBP', target: 'CNY', name: 'GBP/CNY', symbol: '£' },
-        JPY_CNY: { base: 'JPY', target: 'CNY', name: 'JPY/CNY', symbol: '¥' },
-        EUR_USD: { base: 'EUR', target: 'USD', name: 'EUR/USD', symbol: '€' },
-        GBP_USD: { base: 'GBP', target: 'USD', name: 'GBP/USD', symbol: '£' },
+        USD_CNY: { base: 'USD', target: 'CNY', label: 'USD/CNY', symbol: '¥' },
+        EUR_CNY: { base: 'EUR', target: 'CNY', label: 'EUR/CNY', symbol: '¥' },
+        GBP_CNY: { base: 'GBP', target: 'CNY', label: 'GBP/CNY', symbol: '¥' },
+        JPY_CNY: { base: 'JPY', target: 'CNY', label: 'JPY/CNY', symbol: '¥' },
+        EUR_USD: { base: 'EUR', target: 'USD', label: 'EUR/USD', symbol: '$' },
+        GBP_USD: { base: 'GBP', target: 'USD', label: 'GBP/USD', symbol: '$' }
       };
 
-      function formatCurrency(value, currencyPair) {
-        const { target } = currencyMap[currencyPair];
+      const periodButtons = Array.from(document.querySelectorAll('.period-btn'));
+      let chartInstance = null;
+
+      function formatCurrency(value, pairKey = currencyPairEl.value) {
+        const pair = currencyMap[pairKey] || currencyMap.USD_CNY;
+        const target = pair.target;
         const symbol = target === 'CNY' ? '¥' : target === 'USD' ? '$' : target;
         return symbol + Number(value || 0).toFixed(2);
       }
@@ -614,114 +689,122 @@
         const usdB = rateB > 0 ? principal / rateB : 0;
         const diff = usdA - usdB;
 
-        const currencyPair = currencyPairEl.value;
-        resultAEl.textContent = formatCurrency(usdA, currencyPair);
-        resultBEl.textContent = formatCurrency(usdB, currencyPair);
+        const pairKey = currencyPairEl.value;
+        resultAEl.textContent = formatCurrency(usdA, pairKey);
+        resultBEl.textContent = formatCurrency(usdB, pairKey);
 
         if (Math.abs(diff) < 0.001) {
-          diffEl.textContent = formatCurrency(0, currencyPair);
-          diffEl.className = 'value';
-          betterOptionEl.textContent = '✓ 相同';
-          betterOptionEl.className = 'status-pill';
+          diffEl.textContent = formatCurrency(0, pairKey);
+          diffEl.className = 'result-main-value';
+          betterOptionEl.textContent = '方案：相同';
+          betterOptionEl.className = 'status-box';
         } else {
           const absDiff = Math.abs(diff);
-          const directionText = diff > 0 ? 'A 优' : 'B 优';
-          diffEl.textContent = formatCurrency(absDiff, currencyPair);
-          diffEl.className = diff > 0 ? 'value-positive' : 'value-negative';
-          betterOptionEl.textContent = '🎯 ' + directionText;
-          betterOptionEl.className = 'status-pill ' + (diff > 0 ? 'good' : 'bad');
+          diffEl.textContent = formatCurrency(absDiff, pairKey);
+          diffEl.className = diff > 0 ? 'positive' : 'negative';
+          betterOptionEl.textContent = diff > 0 ? '方案：A 更划算' : '方案：B 更划算';
+          betterOptionEl.className = diff > 0 ? 'status-box good' : 'status-box bad';
         }
+      }
+
+      function setPeriodActive(value) {
+        periodButtons.forEach((button) => {
+          button.classList.toggle('active', String(button.dataset.period) === String(value));
+        });
       }
 
       function formatDate(date) {
         return date.toISOString().slice(0, 10);
       }
 
-      async function fetchExchangeRates() {
+      async function fetchRates() {
+        const pairKey = currencyPairEl.value;
+        const pair = currencyMap[pairKey];
+        const days = Number(document.querySelector('.period-btn.active')?.dataset.period || 30);
+        const end = new Date();
+        end.setHours(0, 0, 0, 0);
+        const start = new Date(end);
+        start.setDate(start.getDate() - days);
+
+        const url = `https://api.frankfurter.dev/v1/${formatDate(start)}..${formatDate(end)}?base=${pair.base}&symbols=${pair.target}`;
+
+        chartOverlayEl.style.display = 'flex';
+        chartOverlayEl.textContent = '加载汇率数据…';
+
         try {
-          const currencyPair = currencyPairEl.value;
-          const days = parseInt(timePeriodEl.value);
-          const { base, target, name } = currencyMap[currencyPair];
-
-          const end = new Date();
-          end.setHours(0, 0, 0, 0);
-          const start = new Date(end);
-          start.setDate(start.getDate() - days);
-
-          chartLoadingEl.style.display = 'grid';
-          chartLoadingEl.textContent = `📊 加载 ${name} 数据中...`;
-
-          const url = `https://api.frankfurter.dev/v1/${formatDate(start)}..${formatDate(end)}?base=${base}&symbols=${target}`;
-
           const response = await fetch(url);
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-          }
-
+          if (!response.ok) throw new Error('网络或数据错误');
           const data = await response.json();
 
           if (!data.rates || Object.keys(data.rates).length === 0) {
-            throw new Error('无可用数据');
+            throw new Error('暂无汇率数据');
           }
 
-          const entries = Object.keys(data.rates).sort();
           const labels = [];
           const values = [];
 
-          for (const date of entries) {
-            const rate = data.rates[date]?.[target];
-            if (rate) {
-              labels.push(date);
-              values.push(rate);
+          Object.keys(data.rates).sort().forEach((date) => {
+            const value = data.rates[date]?.[pair.target];
+            if (value) {
+              labels.push(date.slice(5));
+              values.push(value);
             }
+          });
+
+          if (!values.length) {
+            throw new Error('无有效汇率');
           }
 
-          if (values.length === 0) {
-            throw new Error('解析失败');
-          }
+          renderChart(labels, values, pairKey);
 
-          renderChart(labels, values, currencyPair);
-          const latestRate = values[values.length - 1];
-          latestRateEl.textContent = `最新: 1${base}=${latestRate.toFixed(4)}${target}`;
-          chartLoadingEl.style.display = 'none';
+          const latestValue = values[values.length - 1];
+          const firstValue = values[0];
+          const maxValue = Math.max(...values);
+          const minValue = Math.min(...values);
+
+          latestRateEl.textContent = `1 ${pair.base} = ${latestValue.toFixed(4)} ${pair.target}`;
+          metaLatestEl.textContent = latestValue.toFixed(4);
+          metaOpenEl.textContent = firstValue.toFixed(4);
+          metaHighEl.textContent = maxValue.toFixed(4);
+          metaLowEl.textContent = minValue.toFixed(4);
+          chartOverlayEl.style.display = 'none';
         } catch (err) {
-          console.error('Error:', err);
-          chartLoadingEl.textContent = `❌ 加载失败`;
-          chartLoadingEl.style.display = 'grid';
+          console.error(err);
+          chartOverlayEl.textContent = '数据加载失败';
+          chartOverlayEl.style.display = 'flex';
         }
       }
 
-      function renderChart(labels, values, currencyPair) {
-        const { base, target } = currencyMap[currencyPair];
-        const ctx = document.getElementById('exchangeChart');
-        if (!ctx) return;
-
-        const context = ctx.getContext('2d');
+      function renderChart(labels, values, pairKey) {
+        const pair = currencyMap[pairKey];
+        const ctx = document.getElementById('exchangeChart').getContext('2d');
 
         if (chartInstance) {
           chartInstance.destroy();
         }
 
         const displayLabels = labels.map((label, idx) => {
-          const interval = Math.max(1, Math.floor(labels.length / 8));
-          return idx % interval === 0 ? label : '';
+          const step = Math.max(1, Math.ceil(labels.length / 8));
+          return idx % step === 0 ? label : '';
         });
 
-        chartInstance = new Chart(context, {
+        chartInstance = new Chart(ctx, {
           type: 'line',
           data: {
             labels: displayLabels,
             datasets: [{
-              label: `${base}/${target}`,
+              label: `${pair.base}/${pair.target}`,
               data: values,
-              borderColor: '#2c6bed',
-              backgroundColor: 'rgba(44, 107, 237, 0.1)',
+              borderColor: '#5ad4ff',
+              pointBackgroundColor: '#5ad4ff',
+              pointBorderColor: '#071521',
+              pointBorderWidth: 1,
+              pointRadius: 0,
+              pointHoverRadius: 4,
+              backgroundColor: 'rgba(90, 212, 255, 0.12)',
               borderWidth: 2.5,
               fill: true,
-              tension: 0.3,
-              pointRadius: 0,
-              pointHoverRadius: 5,
-              pointHoverBackgroundColor: '#5b8cff',
+              tension: 0.38,
             }]
           },
           options: {
@@ -731,54 +814,62 @@
               mode: 'index',
               intersect: false,
             },
+            animation: {
+              duration: 450,
+              easing: 'easeOutQuart'
+            },
             plugins: {
-              legend: {
-                display: false,
-              },
+              legend: { display: false },
               tooltip: {
-                enabled: true,
-                backgroundColor: 'rgba(29, 36, 51, 0.95)',
-                titleColor: '#fff',
-                bodyColor: '#fff',
-                borderColor: 'rgba(44, 107, 237, 0.4)',
+                backgroundColor: 'rgba(7, 21, 33, 0.94)',
+                titleColor: '#edf6ff',
+                bodyColor: '#ecf5ff',
+                padding: 10,
+                borderColor: 'rgba(90,212,255,0.25)',
                 borderWidth: 1,
-                padding: 8,
                 displayColors: false,
-                titleFont: { weight: '700', size: 12 },
-                bodyFont: { size: 11 },
                 callbacks: {
-                  title: function(context) {
-                    return context[0].label || '';
+                  title: function(items) {
+                    const item = items[0];
+                    return item.label ? item.label : '';
                   },
                   label: function(context) {
-                    return `${base}/${target}: ${context.parsed.y.toFixed(4)}`;
+                    return `${pair.base}/${pair.target}: ${context.parsed.y.toFixed(4)}`;
                   }
                 }
               }
             },
             scales: {
-              y: {
-                beginAtZero: false,
-                grid: {
-                  color: 'rgba(95, 120, 170, 0.06)',
-                  drawBorder: false,
-                },
-                ticks: {
-                  color: '#7f8aa0',
-                  font: { size: 10 },
-                  callback: function(value) {
-                    return value.toFixed(2);
-                  }
-                }
-              },
               x: {
                 grid: {
                   display: false,
                   drawBorder: false,
                 },
                 ticks: {
-                  color: '#7f8aa0',
+                  color: '#8aa0b7',
                   font: { size: 10 },
+                  maxRotation: 0,
+                  autoSkip: true,
+                  maxTicksLimit: 8,
+                },
+                border: {
+                  display: false
+                }
+              },
+              y: {
+                grid: {
+                  color: 'rgba(138,160,183,0.1)',
+                  drawBorder: false,
+                },
+                ticks: {
+                  color: '#8aa0b7',
+                  font: { size: 10 },
+                  callback: function(value) {
+                    return Number(value).toFixed(2);
+                  }
+                },
+                border: {
+                  display: false
                 }
               }
             }
@@ -786,21 +877,25 @@
         });
       }
 
-      // Event listeners
+      currencyPairEl.addEventListener('change', function () {
+        fetchRates();
+        calculate();
+      });
+
       principalEl.addEventListener('input', calculate);
       rateAEl.addEventListener('input', calculate);
       rateBEl.addEventListener('input', calculate);
-      
-      currencyPairEl.addEventListener('change', () => {
-        calculate();
-        fetchExchangeRates();
-      });
-      
-      timePeriodEl.addEventListener('change', fetchExchangeRates);
 
-      // Initial render
+      periodButtons.forEach((button) => {
+        button.addEventListener('click', function () {
+          setPeriodActive(this.dataset.period);
+          fetchRates();
+        });
+      });
+
       calculate();
-      setTimeout(fetchExchangeRates, 100);
+      setPeriodActive(30);
+      fetchRates();
     })();
   </script>
 </body>
