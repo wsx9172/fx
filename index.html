@@ -400,51 +400,6 @@
       letter-spacing: 0.03em;
     }
 
-    .select-wrapper {
-      position: relative;
-    }
-
-    .field-group select {
-      appearance: none;
-      width: 100%;
-      border-radius: 10px;
-      border: 1px solid rgba(133, 157, 191, 0.25);
-      background: rgba(9, 17, 27, 0.7);
-      padding: 10px 28px 10px 12px;
-      color: var(--text);
-      font-size: 13px;
-      outline: none;
-      cursor: pointer;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-    }
-
-    .field-group select option {
-      background: #0d1b2a;
-      color: #edf6ff;
-      padding: 8px;
-    }
-
-    .field-group select:hover {
-      border-color: rgba(58,160,255,0.5);
-    }
-
-    .field-group select:focus {
-      border-color: rgba(58,160,255,0.8);
-      box-shadow: 0 0 0 3px rgba(58,160,255,0.12);
-      transform: translateY(-1px);
-    }
-
-    .select-wrapper::after {
-      content: '▼';
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 9px;
-      color: rgba(90,212,255,0.6);
-      pointer-events: none;
-    }
-
     .number-input-wrapper {
       position: relative;
     }
@@ -561,33 +516,6 @@
       letter-spacing: 0.04em;
     }
 
-    .status-box {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 9px 12px;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.02);
-      border: 1px solid var(--line);
-      font-size: 11px;
-      color: var(--muted);
-      font-weight: 700;
-      letter-spacing: 0.03em;
-      text-align: center;
-    }
-
-    .status-box.good {
-      color: var(--success);
-      border-color: rgba(27,201,142,0.18);
-      background: rgba(27,201,142,0.06);
-    }
-
-    .status-box.bad {
-      color: var(--danger);
-      border-color: rgba(255,92,122,0.18);
-      background: rgba(255,92,122,0.06);
-    }
-
     @media (max-width: 1100px) {
       .workspace {
         grid-template-columns: 1fr;
@@ -680,6 +608,7 @@
             <button class="period-btn active" data-period="90">3M</button>
             <button class="period-btn" data-period="365">1Y</button>
             <button class="period-btn" data-period="1825">5Y</button>
+            <button class="period-btn" data-period="18250">MAX</button>
           </div>
         </div>
 
@@ -696,33 +625,6 @@
         </div>
 
         <div class="calc-body">
-          <div class="field-row">
-            <div class="field-group">
-              <label for="principalCurrency">本金货币</label>
-              <div class="select-wrapper">
-                <select id="principalCurrency" aria-label="选择本金货币">
-                  <option value="CNY" selected>人民币 (CNY)</option>
-                  <option value="USD">美元 (USD)</option>
-                  <option value="EUR">欧元 (EUR)</option>
-                  <option value="GBP">英镑 (GBP)</option>
-                  <option value="JPY">日元 (JPY)</option>
-                </select>
-              </div>
-            </div>
-            <div class="field-group">
-              <label for="targetCurrency">目标货币</label>
-              <div class="select-wrapper">
-                <select id="targetCurrency" aria-label="选择目标货币">
-                  <option value="USD" selected>美元 (USD)</option>
-                  <option value="CNY">人民币 (CNY)</option>
-                  <option value="EUR">欧元 (EUR)</option>
-                  <option value="GBP">英镑 (GBP)</option>
-                  <option value="JPY">日元 (JPY)</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
           <div class="field-group">
             <label for="principal">本金</label>
             <div class="number-input-wrapper">
@@ -759,8 +661,6 @@
               <strong id="difference">--</strong>
             </div>
           </div>
-
-          <div class="status-box" id="betterOption" style="display:none;">方案：待计算</div>
         </div>
       </aside>
     </main>
@@ -771,16 +671,12 @@
       'use strict';
 
       const currencyPairEl = document.getElementById('currencyPair');
-      const principalCurrencyEl = document.getElementById('principalCurrency');
-      const targetCurrencyEl = document.getElementById('targetCurrency');
       const principalEl = document.getElementById('principal');
       const rateAEl = document.getElementById('rateA');
       const rateBEl = document.getElementById('rateB');
       const resultAEl = document.getElementById('resultA');
       const resultBEl = document.getElementById('resultB');
       const diffEl = document.getElementById('difference');
-      const betterOptionEl = document.getElementById('betterOption');
-      const latestRateEl = document.getElementById('latestRate');
       const metaLatestEl = document.getElementById('metaLatest');
       const metaOpenEl = document.getElementById('metaOpen');
       const metaHighEl = document.getElementById('metaHigh');
@@ -788,35 +684,19 @@
       const chartOverlayEl = document.getElementById('chartOverlay');
 
       const currencyMap = {
-        USD_CNY: { base: 'USD', target: 'CNY', label: 'USD/CNY', symbol: '¥' },
-        EUR_CNY: { base: 'EUR', target: 'CNY', label: 'EUR/CNY', symbol: '¥' },
-        GBP_CNY: { base: 'GBP', target: 'CNY', label: 'GBP/CNY', symbol: '¥' },
-        JPY_CNY: { base: 'JPY', target: 'CNY', label: 'JPY/CNY', symbol: '¥' },
-        EUR_USD: { base: 'EUR', target: 'USD', label: 'EUR/USD', symbol: '$' },
-        GBP_USD: { base: 'GBP', target: 'USD', label: 'GBP/USD', symbol: '$' }
-      };
-
-      const currencySymbols = {
-        CNY: '¥',
-        USD: '$',
-        EUR: '€',
-        GBP: '£',
-        JPY: '¥'
+        USD_CNY: { base: 'USD', target: 'CNY', label: 'USD/CNY' },
+        EUR_CNY: { base: 'EUR', target: 'CNY', label: 'EUR/CNY' },
+        GBP_CNY: { base: 'GBP', target: 'CNY', label: 'GBP/CNY' },
+        JPY_CNY: { base: 'JPY', target: 'CNY', label: 'JPY/CNY' },
+        EUR_USD: { base: 'EUR', target: 'USD', label: 'EUR/USD' },
+        GBP_USD: { base: 'GBP', target: 'USD', label: 'GBP/USD' }
       };
 
       const periodButtons = Array.from(document.querySelectorAll('.period-btn'));
       let chartInstance = null;
 
-      function formatCurrency(value, currency = targetCurrencyEl.value || 'USD') {
-        const symbol = currencySymbols[currency] || currency;
-        return symbol + Number(value || 0).toFixed(2);
-      }
-
-      function formatDateLabel(date, days) {
-        if (days <= 90) {
-          return date.slice(5);
-        }
-        return date.slice(0, 7);
+      function formatNumber(value) {
+        return Number(value || 0).toFixed(2);
       }
 
       function calculate() {
@@ -827,9 +707,9 @@
         const resultB = rateB > 0 ? principal / rateB : 0;
         const diff = resultA - resultB;
 
-        resultAEl.textContent = formatCurrency(resultA, targetCurrencyEl.value);
-        resultBEl.textContent = formatCurrency(resultB, targetCurrencyEl.value);
-        diffEl.textContent = formatCurrency(Math.abs(diff), targetCurrencyEl.value);
+        resultAEl.textContent = formatNumber(resultA);
+        resultBEl.textContent = formatNumber(resultB);
+        diffEl.textContent = formatNumber(Math.abs(diff));
       }
 
       function setPeriodActive(value) {
@@ -840,6 +720,16 @@
 
       function formatDate(date) {
         return date.toISOString().slice(0, 10);
+      }
+
+      function formatDateLabel(date, days) {
+        if (days <= 90) {
+          return date.slice(5);
+        } else if (days <= 365) {
+          return date.slice(0, 7);
+        } else {
+          return date.slice(0, 4);
+        }
       }
 
       async function fetchRates() {
@@ -858,7 +748,7 @@
 
         try {
           const response = await fetch(url);
-          if (!response.ok) throw new Error('��络或数据错误');
+          if (!response.ok) throw new Error('网络或数据错误');
           const data = await response.json();
 
           if (!data.rates || Object.keys(data.rates).length === 0) {
@@ -1006,8 +896,6 @@
         calculate();
       });
 
-      principalCurrencyEl.addEventListener('change', calculate);
-      targetCurrencyEl.addEventListener('change', calculate);
       principalEl.addEventListener('input', calculate);
       rateAEl.addEventListener('input', calculate);
       rateBEl.addEventListener('input', calculate);
