@@ -49,6 +49,7 @@
     .page {
       width: 100%;
       height: 100vh;
+      height: 100dvh;
       max-width: 1600px;
       display: flex;
       flex-direction: column;
@@ -57,15 +58,22 @@
       border-right: 1px solid var(--line);
     }
 
+    /* ===== 修复1：topbar 提升层级，避免被 workspace 内容覆盖 ===== */
     .topbar {
+      position: relative;
+      z-index: 100;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 18px;
       padding: 14px 20px 12px;
+      padding-top: calc(14px + env(safe-area-inset-top, 0px));
+      padding-left: calc(20px + env(safe-area-inset-left, 0px));
+      padding-right: calc(20px + env(safe-area-inset-right, 0px));
       border-bottom: 1px solid var(--line);
       background: rgba(11, 19, 32, 0.95);
       backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       flex-shrink: 0;
     }
 
@@ -89,6 +97,7 @@
       font-weight: 700;
       color: #dff6ff;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
+      flex-shrink: 0;
     }
 
     .brand-mark:hover {
@@ -119,11 +128,14 @@
       align-items: center;
       gap: 10px;
       flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
     }
 
     /* ===== 自定义语言选择器 ===== */
     .lang-picker {
       position: relative;
+      z-index: 210;
     }
 
     .lang-trigger {
@@ -190,9 +202,7 @@
       opacity: 0.7;
     }
 
-    .lang-current {
-      white-space: nowrap;
-    }
+    .lang-current { white-space: nowrap; }
 
     .lang-arrow {
       font-size: 9px;
@@ -205,11 +215,16 @@
       transform: rotate(180deg);
     }
 
+    /* ===== 修复2：语言菜单防止被裁剪 + 移动端限高可滚动 ===== */
     .lang-menu {
       position: absolute;
       top: calc(100% + 8px);
       right: 0;
       min-width: 150px;
+      max-width: calc(100vw - 24px);
+      max-height: 60vh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
       padding: 6px;
       margin: 0;
       list-style: none;
@@ -218,11 +233,12 @@
       border-radius: 12px;
       box-shadow: 0 16px 40px rgba(0,0,0,0.55);
       backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
       opacity: 0;
       transform: translateY(-6px);
       pointer-events: none;
       transition: opacity 0.18s ease, transform 0.18s ease;
-      z-index: 200;
+      z-index: 300;
     }
 
     .lang-menu.open {
@@ -243,10 +259,13 @@
       transition: background 0.15s ease;
       font-weight: 600;
       user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    .lang-option:hover {
+    .lang-option:hover,
+    .lang-option:focus-visible {
       background: rgba(90,212,255,0.08);
+      outline: none;
     }
 
     .lang-option.active {
@@ -277,12 +296,17 @@
       white-space: nowrap;
     }
 
+    /* ===== 修复3：workspace 明确 z-index，确保不会盖住 topbar ===== */
     .workspace {
+      position: relative;
+      z-index: 1;
       flex: 1;
       display: grid;
       grid-template-columns: minmax(0, 1.6fr) minmax(360px, 1fr);
       gap: 14px;
       padding: 14px;
+      padding-left: calc(14px + env(safe-area-inset-left, 0px));
+      padding-right: calc(14px + env(safe-area-inset-right, 0px));
       min-height: 0;
       overflow: hidden;
     }
@@ -574,6 +598,7 @@
       cursor: pointer;
       transition: all 0.18s ease;
       font-family: inherit;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .preset-btn:hover {
@@ -726,6 +751,7 @@
       transition: transform 0.2s ease, color 0.2s ease;
       font-variant-numeric: tabular-nums;
       word-break: break-all;
+      text-align: center;
     }
 
     .result-main strong.bump {
@@ -748,7 +774,7 @@
     .result-main-hint.positive { color: var(--success); }
     .result-main-hint.negative { color: var(--danger); }
 
-    /* ===== 平板 / 移动端：单列布局并允许滚动 ===== */
+    /* ===== 修复4：移动端单列 + 自然滚动 + 底部安全区 ===== */
     @media (max-width: 1100px) {
       html, body {
         height: auto;
@@ -756,6 +782,7 @@
         overflow-x: hidden;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
+        overscroll-behavior-y: contain;
       }
 
       body {
@@ -765,6 +792,7 @@
       .page {
         height: auto;
         min-height: 100vh;
+        min-height: 100dvh;
         max-width: 100%;
         border-left: none;
         border-right: none;
@@ -773,6 +801,9 @@
       .workspace {
         grid-template-columns: 1fr;
         padding: 12px;
+        padding-left: calc(12px + env(safe-area-inset-left, 0px));
+        padding-right: calc(12px + env(safe-area-inset-right, 0px));
+        padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
         overflow: visible;
         height: auto;
         min-height: 0;
@@ -783,15 +814,17 @@
         overflow: visible;
       }
 
-      /* 图表区给一个固定高度，避免 canvas 塌陷 */
+      /* 图表区：移动端用视口比例，避免过高或塌陷 */
       .chart-panel {
-        height: 60vh;
-        min-height: 380px;
-        max-height: 560px;
+        height: auto;
+        min-height: 0;
       }
 
       .chart-wrap {
-        min-height: 220px;
+        height: 46vh;
+        min-height: 260px;
+        max-height: 460px;
+        flex: 0 0 auto;
       }
 
       .panel.calc {
@@ -818,20 +851,31 @@
     }
 
     @media (max-width: 640px) {
-      .topbar { padding: 12px 14px; gap: 10px; }
+      .topbar {
+        padding: 12px 14px;
+        padding-top: calc(12px + env(safe-area-inset-top, 0px));
+        padding-left: calc(14px + env(safe-area-inset-left, 0px));
+        padding-right: calc(14px + env(safe-area-inset-right, 0px));
+        gap: 10px;
+      }
       .brand-title { font-size: 1rem; }
       .brand-label { font-size: 10px; }
       .lang-trigger { font-size: 10px; padding: 6px 9px; gap: 6px; }
       .lang-menu { min-width: 140px; }
       .status-pill { font-size: 10px; padding: 6px 8px; }
 
-      .workspace { padding: 10px; gap: 12px; }
+      .workspace { padding: 10px; gap: 12px;
+        padding-left: calc(10px + env(safe-area-inset-left, 0px));
+        padding-right: calc(10px + env(safe-area-inset-right, 0px));
+        padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+      }
       .panel { border-radius: 14px; }
       .chart-panel, .panel.calc { padding: 12px; }
 
-      .chart-panel {
-        height: 55vh;
-        min-height: 340px;
+      .chart-wrap {
+        height: 42vh;
+        min-height: 240px;
+        max-height: 400px;
       }
 
       .field-row { grid-template-columns: 1fr; }
@@ -875,9 +919,9 @@
             <span class="lang-arrow" aria-hidden="true">▾</span>
           </button>
           <ul class="lang-menu" id="langMenu" role="listbox">
-            <li class="lang-option active" role="option" data-value="zh-CN">简体中文</li>
-            <li class="lang-option" role="option" data-value="en">English</li>
-            <li class="lang-option" role="option" data-value="ja">日本語</li>
+            <li class="lang-option active" role="option" data-value="zh-CN" tabindex="0">简体中文</li>
+            <li class="lang-option" role="option" data-value="en" tabindex="0">English</li>
+            <li class="lang-option" role="option" data-value="ja" tabindex="0">日本語</li>
           </ul>
         </div>
         <span class="status-pill">● <span data-i18n="statusLive">LIVE</span></span>
@@ -994,7 +1038,7 @@
       'use strict';
 
       /* ============================================================
-         多语言词典（仅 zh-CN / en / ja）
+         多语言词典
          ============================================================ */
       const i18n = {
         'zh-CN': {
@@ -1175,25 +1219,35 @@
         });
       }
 
+      function selectLang(value) {
+        if (!i18n[value]) return;
+        currentLang = value;
+        try { localStorage.setItem('fxflow.lang', currentLang); } catch (err) { /* ignore */ }
+        updateLangUI();
+        applyLang();
+        closeLangMenu();
+      }
+
       langTriggerEl.addEventListener('click', (e) => {
         e.stopPropagation();
         toggleLangMenu();
       });
 
       langOptions.forEach((opt) => {
-        opt.addEventListener('click', () => {
-          const value = opt.dataset.value;
-          if (i18n[value]) {
-            currentLang = value;
-            try { localStorage.setItem('fxflow.lang', currentLang); } catch (err) { /* ignore */ }
-            updateLangUI();
-            applyLang();
+        opt.addEventListener('click', (e) => {
+          e.stopPropagation();
+          selectLang(opt.dataset.value);
+        });
+        opt.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            selectLang(opt.dataset.value);
           }
-          closeLangMenu();
         });
       });
 
-      document.addEventListener('click', (e) => {
+      /* ===== 修复5：pointerdown 监听，兼容触摸设备点击外部关闭 ===== */
+      document.addEventListener('pointerdown', (e) => {
         if (!langPickerEl.contains(e.target)) closeLangMenu();
       });
 
@@ -1220,7 +1274,6 @@
           el.setAttribute('aria-label', t(el.dataset.i18nAria));
         });
 
-        // 同步加载/失败状态下的提示文字
         if (chartOverlayEl && chartOverlayEl.style.display === 'flex') {
           if (chartOverlayEl.dataset.state === 'loading') {
             chartOverlayEl.textContent = t('loadingRates');
@@ -1539,7 +1592,7 @@
         };
 
         wrapper.addEventListener('pointerdown', (event) => {
-          if (event.button !== 0) return;
+          if (event.pointerType === 'mouse' && event.button !== 0) return;
           const rect = wrapper.getBoundingClientRect();
           const offsetX = event.clientX - rect.left;
           if (offsetX < rect.width - ARROW_ZONE) return;
