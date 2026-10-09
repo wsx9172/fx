@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>FX Flow — 汇率与换汇差额</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%230b1320'/><rect x='12' y='12' width='76' height='76' rx='12' fill='none' stroke='%233aa0ff' stroke-width='4'/><text x='50' y='60' text-anchor='middle' dominant-baseline='middle' font-size='48' fill='%235ad4ff' font-weight='bold'>¥$</text></svg>" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -121,54 +121,145 @@
       flex-wrap: wrap;
     }
 
-    /* ===== 语言切换器 ===== */
-    .lang-selector {
+    /* ===== 自定义语言选择器 ===== */
+    .lang-picker {
       position: relative;
-      display: inline-flex;
-      align-items: center;
     }
 
-    .lang-select {
-      appearance: none;
+    .lang-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 10px;
+      border-radius: 9px;
       border: 1px solid var(--line);
       background: rgba(255,255,255,0.03);
       color: var(--text);
       font-size: 11px;
       font-weight: 700;
-      letter-spacing: 0.02em;
-      border-radius: 6px;
-      padding: 7px 26px 7px 10px;
       cursor: pointer;
-      outline: none;
       transition: all 0.2s ease;
       font-family: inherit;
+      letter-spacing: 0.02em;
+      outline: none;
     }
 
-    .lang-select:hover {
+    .lang-trigger:hover {
       border-color: rgba(90,212,255,0.4);
       background: rgba(90,212,255,0.06);
     }
 
-    .lang-select:focus {
+    .lang-trigger:focus-visible {
+      box-shadow: 0 0 0 2px rgba(58, 160, 255, 0.25);
+    }
+
+    .lang-trigger[aria-expanded="true"] {
       border-color: rgba(90,212,255,0.6);
-      box-shadow: 0 0 0 2px rgba(58, 160, 255, 0.12);
+      background: rgba(90,212,255,0.08);
+      box-shadow: 0 0 0 2px rgba(58,160,255,0.14);
     }
 
-    .lang-select option {
-      background: #0d1b2a;
-      color: #edf6ff;
-      padding: 6px;
+    .lang-globe {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(90,212,255,0.7);
+      position: relative;
+      flex-shrink: 0;
     }
-
-    .lang-selector::after {
-      content: '▾';
+    .lang-globe::before,
+    .lang-globe::after {
+      content: '';
       position: absolute;
-      right: 9px;
+      background: rgba(90,212,255,0.7);
+    }
+    .lang-globe::before {
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 1.5px;
+      transform: translateX(-50%);
+      opacity: 0.7;
+    }
+    .lang-globe::after {
       top: 50%;
+      left: 0;
+      right: 0;
+      height: 1.5px;
       transform: translateY(-50%);
+      opacity: 0.7;
+    }
+
+    .lang-current {
+      white-space: nowrap;
+    }
+
+    .lang-arrow {
       font-size: 9px;
       color: rgba(90,212,255,0.7);
+      transition: transform 0.2s ease;
+      line-height: 1;
+    }
+
+    .lang-trigger[aria-expanded="true"] .lang-arrow {
+      transform: rotate(180deg);
+    }
+
+    .lang-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      min-width: 150px;
+      padding: 6px;
+      margin: 0;
+      list-style: none;
+      background: linear-gradient(180deg, rgba(17,31,47,0.98), rgba(10,18,28,0.98));
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.55);
+      backdrop-filter: blur(14px);
+      opacity: 0;
+      transform: translateY(-6px);
       pointer-events: none;
+      transition: opacity 0.18s ease, transform 0.18s ease;
+      z-index: 200;
+    }
+
+    .lang-menu.open {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .lang-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--text);
+      cursor: pointer;
+      transition: background 0.15s ease;
+      font-weight: 600;
+      user-select: none;
+    }
+
+    .lang-option:hover {
+      background: rgba(90,212,255,0.08);
+    }
+
+    .lang-option.active {
+      background: linear-gradient(135deg, rgba(58,160,255,0.2), rgba(90,212,255,0.1));
+      color: var(--primary-2);
+    }
+
+    .lang-option.active::after {
+      content: '✓';
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--success);
+      font-weight: 800;
     }
 
     .status-pill {
@@ -183,6 +274,7 @@
       font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.03em;
+      white-space: nowrap;
     }
 
     .workspace {
@@ -427,6 +519,7 @@
       color: var(--muted);
       background: rgba(255,255,255,0.02);
       border: 1px solid var(--line);
+      white-space: nowrap;
     }
 
     .calc-body {
@@ -632,6 +725,7 @@
       text-shadow: 0 4px 20px rgba(246, 196, 83, 0.18);
       transition: transform 0.2s ease, color 0.2s ease;
       font-variant-numeric: tabular-nums;
+      word-break: break-all;
     }
 
     .result-main strong.bump {
@@ -645,31 +739,101 @@
       font-weight: 600;
       text-align: center;
       line-height: 1.5;
-      max-width: 95%;
+      max-width: 100%;
       transition: color 0.2s ease;
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }
 
     .result-main-hint.positive { color: var(--success); }
     .result-main-hint.negative { color: var(--danger); }
 
+    /* ===== 平板 / 移动端：单列布局并允许滚动 ===== */
     @media (max-width: 1100px) {
-      .workspace { grid-template-columns: 1fr; }
-      .page { height: auto; min-height: 100vh; }
-      body { overflow: auto; }
-      .panel.calc { min-height: auto; }
-      .result-card { flex: 0 0 auto; }
-      .result-main { padding-top: 16px; padding-bottom: 8px; }
+      html, body {
+        height: auto;
+        min-height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      body {
+        display: block;
+      }
+
+      .page {
+        height: auto;
+        min-height: 100vh;
+        max-width: 100%;
+        border-left: none;
+        border-right: none;
+      }
+
+      .workspace {
+        grid-template-columns: 1fr;
+        padding: 12px;
+        overflow: visible;
+        height: auto;
+        min-height: 0;
+      }
+
+      .panel {
+        min-height: 0;
+        overflow: visible;
+      }
+
+      /* 图表区给一个固定高度，避免 canvas 塌陷 */
+      .chart-panel {
+        height: 60vh;
+        min-height: 380px;
+        max-height: 560px;
+      }
+
+      .chart-wrap {
+        min-height: 220px;
+      }
+
+      .panel.calc {
+        min-height: auto;
+        overflow: visible;
+      }
+
+      .calc-body {
+        flex: 0 0 auto;
+        overflow: visible;
+      }
+
+      .result-card {
+        flex: 0 0 auto;
+        min-height: auto;
+      }
+
+      .result-main {
+        flex: 0 0 auto;
+        padding-top: 16px;
+        padding-bottom: 8px;
+        justify-content: center;
+      }
     }
 
     @media (max-width: 640px) {
       .topbar { padding: 12px 14px; gap: 10px; }
       .brand-title { font-size: 1rem; }
       .brand-label { font-size: 10px; }
-      .lang-select { font-size: 10px; padding: 6px 22px 6px 8px; }
+      .lang-trigger { font-size: 10px; padding: 6px 9px; gap: 6px; }
+      .lang-menu { min-width: 140px; }
       .status-pill { font-size: 10px; padding: 6px 8px; }
+
       .workspace { padding: 10px; gap: 12px; }
       .panel { border-radius: 14px; }
       .chart-panel, .panel.calc { padding: 12px; }
+
+      .chart-panel {
+        height: 55vh;
+        min-height: 340px;
+      }
+
       .field-row { grid-template-columns: 1fr; }
       .chart-header { align-items: flex-start; }
       .chart-toolbox { flex-direction: column; align-items: flex-start; }
@@ -677,6 +841,7 @@
       .meta-chip { font-size: 9px; padding: 4px 8px; }
       .meta-chip strong { font-size: 10px; }
       .result-main strong { font-size: 2.2rem; }
+      .result-main-hint { font-size: 11px; }
       .calc-body { gap: 10px; }
       .preset-btn { font-size: 9px; padding: 2px 7px; }
     }
@@ -686,6 +851,7 @@
       .period-btn { padding: 4px 8px; font-size: 9px; }
       .preset-btn { font-size: 9px; padding: 2px 6px; }
       .brand-label { display: none; }
+      .status-pill { display: none; }
     }
   </style>
 </head>
@@ -701,12 +867,18 @@
       </div>
 
       <div class="topbar-controls">
-        <div class="lang-selector">
-          <select id="languageSelect" class="lang-select" aria-label="Language">
-            <option value="zh-CN">简体中文</option>
-            <option value="en">English</option>
-            <option value="ja">日本語</option>
-          </select>
+        <div class="lang-picker" id="langPicker">
+          <button type="button" class="lang-trigger" id="langTrigger"
+                  aria-haspopup="listbox" aria-expanded="false">
+            <span class="lang-globe" aria-hidden="true"></span>
+            <span class="lang-current" id="langCurrentLabel">简体中文</span>
+            <span class="lang-arrow" aria-hidden="true">▾</span>
+          </button>
+          <ul class="lang-menu" id="langMenu" role="listbox">
+            <li class="lang-option active" role="option" data-value="zh-CN">简体中文</li>
+            <li class="lang-option" role="option" data-value="en">English</li>
+            <li class="lang-option" role="option" data-value="ja">日本語</li>
+          </ul>
         </div>
         <span class="status-pill">● <span data-i18n="statusLive">LIVE</span></span>
       </div>
@@ -822,9 +994,7 @@
       'use strict';
 
       /* ============================================================
-         多语言词典
-         - 纯文本键：直接返回字符串
-         - 动态键：值为函数，接受参数返回字符串
+         多语言词典（仅 zh-CN / en / ja）
          ============================================================ */
       const i18n = {
         'zh-CN': {
@@ -919,12 +1089,19 @@
         }
       };
 
+      const LANG_LABELS = {
+        'zh-CN': '简体中文',
+        'en': 'English',
+        'ja': '日本語'
+      };
+
       let currentLang = 'zh-CN';
 
       function t(key) {
         const dict = i18n[currentLang] || i18n['zh-CN'];
         const v = dict[key];
-        return typeof v === 'string' ? v : (i18n['zh-CN'][key] || key);
+        if (typeof v === 'string') return v;
+        return i18n['zh-CN'][key] || key;
       }
 
       function tf(key, ...args) {
@@ -936,7 +1113,12 @@
       /* ============================================================
          DOM 引用
          ============================================================ */
-      const languageSelectEl = document.getElementById('languageSelect');
+      const langPickerEl = document.getElementById('langPicker');
+      const langTriggerEl = document.getElementById('langTrigger');
+      const langMenuEl = document.getElementById('langMenu');
+      const langCurrentLabelEl = document.getElementById('langCurrentLabel');
+      const langOptions = Array.from(langMenuEl.querySelectorAll('.lang-option'));
+
       const currencyPairEl = document.getElementById('currencyPair');
       const principalEl = document.getElementById('principal');
       const rateAEl = document.getElementById('rateA');
@@ -969,6 +1151,57 @@
       let chartInstance = null;
 
       /* ============================================================
+         自定义语言选择器
+         ============================================================ */
+      function openLangMenu() {
+        langMenuEl.classList.add('open');
+        langTriggerEl.setAttribute('aria-expanded', 'true');
+      }
+
+      function closeLangMenu() {
+        langMenuEl.classList.remove('open');
+        langTriggerEl.setAttribute('aria-expanded', 'false');
+      }
+
+      function toggleLangMenu() {
+        if (langMenuEl.classList.contains('open')) closeLangMenu();
+        else openLangMenu();
+      }
+
+      function updateLangUI() {
+        langCurrentLabelEl.textContent = LANG_LABELS[currentLang] || currentLang;
+        langOptions.forEach((o) => {
+          o.classList.toggle('active', o.dataset.value === currentLang);
+        });
+      }
+
+      langTriggerEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleLangMenu();
+      });
+
+      langOptions.forEach((opt) => {
+        opt.addEventListener('click', () => {
+          const value = opt.dataset.value;
+          if (i18n[value]) {
+            currentLang = value;
+            try { localStorage.setItem('fxflow.lang', currentLang); } catch (err) { /* ignore */ }
+            updateLangUI();
+            applyLang();
+          }
+          closeLangMenu();
+        });
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!langPickerEl.contains(e.target)) closeLangMenu();
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeLangMenu();
+      });
+
+      /* ============================================================
          语言应用
          ============================================================ */
       function applyLang() {
@@ -987,8 +1220,8 @@
           el.setAttribute('aria-label', t(el.dataset.i18nAria));
         });
 
+        // 同步加载/失败状态下的提示文字
         if (chartOverlayEl && chartOverlayEl.style.display === 'flex') {
-          // 如果当前处于加载/失败状态，同步更新提示文案
           if (chartOverlayEl.dataset.state === 'loading') {
             chartOverlayEl.textContent = t('loadingRates');
           } else if (chartOverlayEl.dataset.state === 'failed') {
@@ -996,7 +1229,6 @@
           }
         }
 
-        // 重新计算，刷新差额方向提示
         calculate();
       }
 
@@ -1004,7 +1236,7 @@
         try {
           const saved = localStorage.getItem('fxflow.lang');
           if (saved && i18n[saved]) return saved;
-        } catch (e) { /* ignore */ }
+        } catch (err) { /* ignore */ }
 
         const nav = (navigator.language || 'zh-CN').toLowerCase();
         if (nav.startsWith('zh')) return 'zh-CN';
@@ -1101,7 +1333,7 @@
       }
 
       /* ============================================================
-         拉取汇率数据 + 渲染图表
+         拉取汇率 + 渲染图表
          ============================================================ */
       async function fetchRates(options = {}) {
         const { syncRates = false } = options;
@@ -1339,12 +1571,6 @@
       /* ============================================================
          事件绑定
          ============================================================ */
-      languageSelectEl.addEventListener('change', () => {
-        currentLang = languageSelectEl.value;
-        try { localStorage.setItem('fxflow.lang', currentLang); } catch (e) { /* ignore */ }
-        applyLang();
-      });
-
       currencyPairEl.addEventListener('change', function () {
         fetchRates({ syncRates: true });
       });
@@ -1364,7 +1590,7 @@
          初始化
          ============================================================ */
       currentLang = detectInitialLang();
-      languageSelectEl.value = currentLang;
+      updateLangUI();
       applyLang();
 
       setPeriodActive(90);
