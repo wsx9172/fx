@@ -137,25 +137,57 @@
       letter-spacing: 0.03em;
     }
 
+    .currency-pair-wrapper {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+
     .ghost-select {
       appearance: none;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.02);
-      color: var(--text);
-      font-size: 11px;
+      border: 1px solid rgba(90, 212, 255, 0.4);
+      background: rgba(9, 24, 40, 0.85);
+      color: var(--primary-2);
+      font-size: 12px;
       border-radius: 8px;
-      padding: 8px 30px 8px 10px;
+      padding: 8px 30px 8px 12px;
       outline: none;
-      min-width: 120px;
-      background-image:
-        linear-gradient(45deg, transparent 50%, var(--muted) 50%),
-        linear-gradient(135deg, var(--muted) 50%, transparent 50%);
-      background-position:
-        calc(100% - 16px) calc(50% - 2px),
-        calc(100% - 11px) calc(50% - 2px);
-      background-size: 5px 5px, 5px 5px;
-      background-repeat: no-repeat;
+      min-width: 140px;
       cursor: pointer;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      transition: all 0.2s ease;
+    }
+
+    .ghost-select:hover {
+      background: rgba(9, 24, 40, 0.95);
+      border-color: rgba(90, 212, 255, 0.6);
+    }
+
+    .ghost-select:focus {
+      background: rgba(9, 24, 40, 0.95);
+      border-color: rgba(90, 212, 255, 0.8);
+      box-shadow: 0 0 0 3px rgba(58, 160, 255, 0.15);
+    }
+
+    .ghost-select option {
+      background: #0d1b2a;
+      color: #edf6ff;
+      padding: 8px;
+    }
+
+    .currency-pair-wrapper::after {
+      content: '';
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid rgba(90, 212, 255, 0.7);
+      pointer-events: none;
     }
 
     .workspace {
@@ -368,6 +400,25 @@
       flex-direction: column;
       gap: 12px;
       min-height: 0;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .calc-body::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .calc-body::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .calc-body::-webkit-scrollbar-thumb {
+      background: rgba(90,212,255,0.2);
+      border-radius: 3px;
+    }
+
+    .calc-body::-webkit-scrollbar-thumb:hover {
+      background: rgba(90,212,255,0.35);
     }
 
     .field-group {
@@ -383,7 +434,11 @@
       letter-spacing: 0.03em;
     }
 
-    .field-group input {
+    .number-input-wrapper {
+      position: relative;
+    }
+
+    .field-group input[type="number"] {
       width: 100%;
       border-radius: 12px;
       border: 1px solid rgba(133, 157, 191, 0.25);
@@ -395,10 +450,45 @@
       transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
     }
 
-    .field-group input:focus {
+    /* 隐藏默认的上下调整箭头 */
+    .field-group input[type="number"]::-webkit-outer-spin-button,
+    .field-group input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .field-group input[type="number"][type="number"] {
+      -moz-appearance: textfield;
+    }
+
+    .field-group input[type="number"]:focus {
       border-color: rgba(58,160,255,0.8);
       box-shadow: 0 0 0 3px rgba(58,160,255,0.12);
       transform: translateY(-1px);
+    }
+
+    /* 自定义调整按钮 */
+    .number-input-wrapper::after,
+    .number-input-wrapper::before {
+      content: '';
+      position: absolute;
+      right: 10px;
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      pointer-events: none;
+      cursor: pointer;
+    }
+
+    .number-input-wrapper::before {
+      top: 8px;
+      border-bottom: 6px solid rgba(90, 212, 255, 0.6);
+    }
+
+    .number-input-wrapper::after {
+      bottom: 8px;
+      border-top: 6px solid rgba(90, 212, 255, 0.6);
     }
 
     .field-row {
@@ -548,14 +638,16 @@
 
       <div class="topbar-controls">
         <span class="status-pill">● LIVE</span>
-        <select id="currencyPair" class="ghost-select" aria-label="请选择货币对">
-          <option value="USD_CNY" selected>USD/CNY</option>
-          <option value="EUR_CNY">EUR/CNY</option>
-          <option value="GBP_CNY">GBP/CNY</option>
-          <option value="JPY_CNY">JPY/CNY</option>
-          <option value="EUR_USD">EUR/USD</option>
-          <option value="GBP_USD">GBP/USD</option>
-        </select>
+        <div class="currency-pair-wrapper">
+          <select id="currencyPair" class="ghost-select" aria-label="请选择货币对">
+            <option value="USD_CNY" selected>USD/CNY</option>
+            <option value="EUR_CNY">EUR/CNY</option>
+            <option value="GBP_CNY">GBP/CNY</option>
+            <option value="JPY_CNY">JPY/CNY</option>
+            <option value="EUR_USD">EUR/USD</option>
+            <option value="GBP_USD">GBP/USD</option>
+          </select>
+        </div>
       </div>
     </header>
 
@@ -602,17 +694,23 @@
         <div class="calc-body">
           <div class="field-group">
             <label for="principal">本金</label>
-            <input id="principal" type="number" value="10000" min="0" step="100" placeholder="请输入金额">
+            <div class="number-input-wrapper">
+              <input id="principal" type="number" value="10000" min="0" step="100" placeholder="请输入金额">
+            </div>
           </div>
 
           <div class="field-row">
             <div class="field-group">
               <label for="rateA">汇率 A</label>
-              <input id="rateA" type="number" value="6.66" min="0.01" step="0.01" placeholder="例如 6.66">
+              <div class="number-input-wrapper">
+                <input id="rateA" type="number" value="6.66" min="0.01" step="0.01" placeholder="例如 6.66">
+              </div>
             </div>
             <div class="field-group">
               <label for="rateB">汇率 B</label>
-              <input id="rateB" type="number" value="6.67" min="0.01" step="0.01" placeholder="例如 6.67">
+              <div class="number-input-wrapper">
+                <input id="rateB" type="number" value="6.67" min="0.01" step="0.01" placeholder="例如 6.67">
+              </div>
             </div>
           </div>
 
