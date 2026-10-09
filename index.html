@@ -132,14 +132,15 @@
 
     .chart-controls {
       display: flex;
-      gap: 10px;
+      gap: 12px;
       flex-wrap: wrap;
       align-items: center;
+      margin-bottom: 12px;
     }
 
     .control-group {
       display: flex;
-      gap: 6px;
+      gap: 8px;
       align-items: center;
     }
 
@@ -147,10 +148,11 @@
       font-size: 12px;
       color: var(--muted);
       font-weight: 600;
+      white-space: nowrap;
     }
 
     select {
-      padding: 6px 10px;
+      padding: 8px 12px;
       border: 1px solid var(--line);
       border-radius: 8px;
       background: white;
@@ -159,7 +161,8 @@
       font-weight: 600;
       cursor: pointer;
       outline: none;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      min-width: 140px;
     }
 
     select:hover {
@@ -186,16 +189,16 @@
 
     .chart-box {
       position: relative;
-      min-height: 280px;
+      min-height: 300px;
       border-radius: 16px;
       overflow: hidden;
       background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(228,236,255,0.4));
       border: 1px solid rgba(95, 120, 170, 0.15);
-      padding: 12px;
+      padding: 16px;
     }
 
     #exchangeChart {
-      max-height: 250px;
+      max-height: 260px;
     }
 
     .chart-loading {
@@ -207,7 +210,8 @@
       font-size: 14px;
       text-align: center;
       padding: 26px;
-      background: rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.5);
+      backdrop-filter: blur(4px);
     }
 
     form {
@@ -287,6 +291,7 @@
 
     .result-item strong {
       font-size: 1.05rem;
+      font-weight: 700;
     }
 
     .result-total {
@@ -371,15 +376,16 @@
 
       .chart-controls {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
       }
 
       .control-group {
-        width: 100%;
+        flex-direction: column;
       }
 
       select {
         width: 100%;
+        min-width: auto;
       }
     }
   </style>
@@ -404,18 +410,18 @@
 
           <div class="chart-controls">
             <div class="control-group">
-              <label for="currencyPair">货币对：</label>
+              <label for="currencyPair">货币对</label>
               <select id="currencyPair">
-                <option value="USD_CNY">美元 → 人民币 (USD/CNY)</option>
-                <option value="EUR_CNY">欧元 → 人民币 (EUR/CNY)</option>
-                <option value="GBP_CNY">英镑 → 人民币 (GBP/CNY)</option>
-                <option value="JPY_CNY">日元 → 人民币 (JPY/CNY)</option>
-                <option value="EUR_USD">欧元 → 美元 (EUR/USD)</option>
-                <option value="GBP_USD">英镑 → 美元 (GBP/USD)</option>
+                <option value="USD_CNY" selected>美元/人民币</option>
+                <option value="EUR_CNY">欧元/人民币</option>
+                <option value="GBP_CNY">英镑/人民币</option>
+                <option value="JPY_CNY">日元/人民币</option>
+                <option value="EUR_USD">欧元/美元</option>
+                <option value="GBP_USD">英镑/美元</option>
               </select>
             </div>
             <div class="control-group">
-              <label for="timePeriod">时间周期：</label>
+              <label for="timePeriod">时间周期</label>
               <select id="timePeriod">
                 <option value="7">7 天</option>
                 <option value="30" selected>30 天</option>
@@ -440,11 +446,11 @@
           <div class="row">
             <div class="field-group">
               <label for="rateA">汇率 A</label>
-              <input type="number" id="rateA" value="6.66" min="0.01" step="0.01" placeholder="例如：6.66">
+              <input type="number" id="rateA" value="6.66" min="0.01" step="0.01" placeholder="输入汇率">
             </div>
             <div class="field-group">
               <label for="rateB">汇率 B</label>
-              <input type="number" id="rateB" value="6.67" min="0.01" step="0.01" placeholder="例如：6.67">
+              <input type="number" id="rateB" value="6.67" min="0.01" step="0.01" placeholder="输入汇率">
             </div>
           </div>
         </form>
@@ -501,18 +507,18 @@
       let chartInstance = null;
 
       const currencyMap = {
-        USD_CNY: { base: 'USD', target: 'CNY', name: 'USD/CNY' },
-        EUR_CNY: { base: 'EUR', target: 'CNY', name: 'EUR/CNY' },
-        GBP_CNY: { base: 'GBP', target: 'CNY', name: 'GBP/CNY' },
-        JPY_CNY: { base: 'JPY', target: 'CNY', name: 'JPY/CNY' },
-        EUR_USD: { base: 'EUR', target: 'USD', name: 'EUR/USD' },
-        GBP_USD: { base: 'GBP', target: 'USD', name: 'GBP/USD' },
+        USD_CNY: { base: 'USD', target: 'CNY', name: 'USD/CNY', symbol: '$' },
+        EUR_CNY: { base: 'EUR', target: 'CNY', name: 'EUR/CNY', symbol: '€' },
+        GBP_CNY: { base: 'GBP', target: 'CNY', name: 'GBP/CNY', symbol: '£' },
+        JPY_CNY: { base: 'JPY', target: 'CNY', name: 'JPY/CNY', symbol: '¥' },
+        EUR_USD: { base: 'EUR', target: 'USD', name: 'EUR/USD', symbol: '€' },
+        GBP_USD: { base: 'GBP', target: 'USD', name: 'GBP/USD', symbol: '£' },
       };
 
       function formatCurrency(value, currencyPair) {
-        const { target } = currencyMap[currencyPair];
-        const symbol = target === 'CNY' ? '¥' : target === 'USD' ? '$' : target;
-        return symbol + Number(value || 0).toFixed(2);
+        const { target, symbol } = currencyMap[currencyPair];
+        const symbol2 = target === 'CNY' ? '¥' : target === 'USD' ? '$' : target;
+        return symbol2 + Number(value || 0).toFixed(2);
       }
 
       function calculate() {
@@ -531,14 +537,14 @@
         if (Math.abs(diff) < 0.001) {
           diffEl.textContent = formatCurrency(0, currencyPair);
           diffEl.className = 'value';
-          betterOptionEl.textContent = '更划算方案：两者相同';
+          betterOptionEl.textContent = '✓ 两者汇率相同';
           betterOptionEl.className = 'status-pill';
         } else {
           const absDiff = Math.abs(diff);
           const directionText = diff > 0 ? 'A 更划算' : 'B 更划算';
-          diffEl.textContent = formatCurrency(absDiff, currencyPair) + (diff > 0 ? '（A比B多）' : '（B比A多）');
+          diffEl.textContent = formatCurrency(absDiff, currencyPair) + (diff > 0 ? ' ↑ A优' : ' ↓ B优');
           diffEl.className = diff > 0 ? 'value-positive' : 'value-negative';
-          betterOptionEl.textContent = '更划算方案：' + directionText;
+          betterOptionEl.textContent = '🎯 ' + directionText;
           betterOptionEl.className = 'status-pill ' + (diff > 0 ? 'good' : 'bad');
         }
       }
@@ -548,26 +554,32 @@
       }
 
       async function fetchExchangeRates() {
-        const currencyPair = currencyPairEl.value;
-        const days = parseInt(timePeriodEl.value);
-        const { base, target } = currencyMap[currencyPair];
-
-        const end = new Date();
-        end.setHours(0, 0, 0, 0);
-        const start = new Date(end);
-        start.setDate(start.getDate() - days);
-
-        chartLoadingEl.style.display = 'grid';
-
-        const url = `https://api.frankfurter.dev/v1/${formatDate(start)}..${formatDate(end)}?base=${base}&symbols=${target}`;
-
         try {
+          const currencyPair = currencyPairEl.value;
+          const days = parseInt(timePeriodEl.value);
+          const { base, target, name } = currencyMap[currencyPair];
+
+          const end = new Date();
+          end.setHours(0, 0, 0, 0);
+          const start = new Date(end);
+          start.setDate(start.getDate() - days);
+
+          chartLoadingEl.style.display = 'grid';
+          chartLoadingEl.textContent = `正在加载 ${name} 数据...`;
+
+          const url = `https://api.frankfurter.dev/v1/${formatDate(start)}..${formatDate(end)}?base=${base}&symbols=${target}`;
+          console.log('Fetching from:', url);
+
           const response = await fetch(url);
-          if (!response.ok) throw new Error('API error');
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+
           const data = await response.json();
+          console.log('API Response:', data);
 
           if (!data.rates || Object.keys(data.rates).length === 0) {
-            throw new Error('No data available');
+            throw new Error('没有可用的汇率数据');
           }
 
           const entries = Object.keys(data.rates).sort();
@@ -577,54 +589,76 @@
           for (const date of entries) {
             const rate = data.rates[date]?.[target];
             if (rate) {
-              labels.push(date.slice(5).replace('-', '/'));
+              labels.push(date.slice(5));
               values.push(rate);
             }
           }
 
-          if (values.length === 0) throw new Error('No valid rates');
+          if (values.length === 0) {
+            throw new Error('无法解析汇率数据');
+          }
 
+          console.log(`成功加载 ${values.length} 条数据`);
           renderChart(labels, values, currencyPair);
           const latestRate = values[values.length - 1];
           latestRateEl.textContent = `最新: 1 ${base} = ${latestRate.toFixed(4)} ${target}`;
           chartLoadingEl.style.display = 'none';
         } catch (err) {
-          console.error('Fetch error:', err);
-          chartLoadingEl.textContent = '📉 数据加载失败，请检查网络连接';
+          console.error('Error fetching rates:', err);
+          chartLoadingEl.textContent = `❌ 数据加载失败: ${err.message}`;
+          chartLoadingEl.style.display = 'grid';
         }
       }
 
       function renderChart(labels, values, currencyPair) {
         const { base, target } = currencyMap[currencyPair];
-        const ctx = document.getElementById('exchangeChart').getContext('2d');
+        const ctx = document.getElementById('exchangeChart');
+        if (!ctx) return;
+
+        const context = ctx.getContext('2d');
 
         if (chartInstance) {
           chartInstance.destroy();
         }
 
-        chartInstance = new Chart(ctx, {
+        // 简化标签显示
+        const displayLabels = labels.map((label, idx) => {
+          if (labels.length <= 30) {
+            return idx % 5 === 0 ? label : '';
+          } else if (labels.length <= 90) {
+            return idx % 7 === 0 ? label : '';
+          } else {
+            return idx % 15 === 0 ? label : '';
+          }
+        });
+
+        chartInstance = new Chart(context, {
           type: 'line',
           data: {
-            labels: labels,
+            labels: displayLabels,
             datasets: [{
-              label: `${base}/${target} Exchange Rate`,
+              label: `${base} → ${target}`,
               data: values,
               borderColor: '#2c6bed',
-              backgroundColor: 'rgba(44, 107, 237, 0.08)',
-              borderWidth: 2.5,
+              backgroundColor: 'rgba(44, 107, 237, 0.1)',
+              borderWidth: 3,
               fill: true,
-              tension: 0.4,
-              pointRadius: 3,
+              tension: 0.35,
+              pointRadius: 0,
               pointBackgroundColor: '#2c6bed',
               pointBorderColor: '#fff',
               pointBorderWidth: 2,
-              pointHoverRadius: 5,
+              pointHoverRadius: 6,
               pointHoverBackgroundColor: '#5b8cff',
             }]
           },
           options: {
             responsive: true,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false,
+            interaction: {
+              mode: 'index',
+              intersect: false,
+            },
             plugins: {
               legend: {
                 display: true,
@@ -632,18 +666,23 @@
                   color: '#5d6879',
                   font: { size: 12, weight: '600' },
                   usePointStyle: true,
-                  padding: 15,
+                  padding: 16,
+                  boxWidth: 6,
                 }
               },
               tooltip: {
-                backgroundColor: 'rgba(29, 36, 51, 0.9)',
+                backgroundColor: 'rgba(29, 36, 51, 0.95)',
                 titleColor: '#fff',
                 bodyColor: '#fff',
-                borderColor: 'rgba(44, 107, 237, 0.3)',
+                borderColor: 'rgba(44, 107, 237, 0.4)',
                 borderWidth: 1,
                 padding: 12,
                 displayColors: false,
+                titleFont: { weight: '700' },
                 callbacks: {
+                  title: function(context) {
+                    return context[0].label || '日期';
+                  },
                   label: function(context) {
                     return `${base}/${target}: ${context.parsed.y.toFixed(4)}`;
                   }
@@ -654,7 +693,7 @@
               y: {
                 beginAtZero: false,
                 grid: {
-                  color: 'rgba(95, 120, 170, 0.1)',
+                  color: 'rgba(95, 120, 170, 0.08)',
                   drawBorder: false,
                 },
                 ticks: {
@@ -668,11 +707,11 @@
               x: {
                 grid: {
                   display: false,
+                  drawBorder: false,
                 },
                 ticks: {
                   color: '#7f8aa0',
                   font: { size: 11 },
-                  maxTicksLimit: 6,
                 }
               }
             }
@@ -684,11 +723,17 @@
       principalEl.addEventListener('input', calculate);
       rateAEl.addEventListener('input', calculate);
       rateBEl.addEventListener('input', calculate);
+      
       currencyPairEl.addEventListener('change', () => {
+        console.log('Currency pair changed to:', currencyPairEl.value);
         calculate();
         fetchExchangeRates();
       });
-      timePeriodEl.addEventListener('change', fetchExchangeRates);
+      
+      timePeriodEl.addEventListener('change', () => {
+        console.log('Time period changed to:', timePeriodEl.value, 'days');
+        fetchExchangeRates();
+      });
 
       // Initial render
       calculate();
