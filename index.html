@@ -1,387 +1,584 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>人民币美元汇率差计算器</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background: #f0f2f5;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    padding: 20px;
-  }
-  .container {
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
-    width: 100%;
-    max-width: 720px;
-    padding: 32px;
-  }
-  h1 {
-    font-size: 22px;
-    color: #1a1a2e;
-    margin-bottom: 4px;
-    text-align: center;
-  }
-  .subtitle {
-    text-align: center;
-    color: #888;
-    font-size: 13px;
-    margin-bottom: 24px;
-  }
-  .chart-section {
-    background: #fafbfc;
-    border: 1px solid #eee;
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 24px;
-  }
-  .chart-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .chart-header h2 {
-    font-size: 14px;
-    color: #555;
-    font-weight: 500;
-  }
-  .chart-header .rate-badge {
-    font-size: 13px;
-    background: #e8f5e9;
-    color: #2e7d32;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-weight: 500;
-  }
-  #chart {
-    width: 100%;
-    height: 180px;
-    display: block;
-  }
-  .chart-loading {
-    text-align: center;
-    color: #aaa;
-    font-size: 13px;
-    padding: 40px 0;
-  }
-  .form-group {
-    margin-bottom: 18px;
-  }
-  label {
-    display: block;
-    font-size: 13px;
-    color: #555;
-    margin-bottom: 6px;
-    font-weight: 500;
-  }
-  input[type="number"] {
-    width: 100%;
-    padding: 12px 14px;
-    border: 1.5px solid #e0e0e0;
-    border-radius: 10px;
-    font-size: 16px;
-    transition: border 0.2s, box-shadow 0.2s;
-    outline: none;
-    background: #fafafa;
-  }
-  input[type="number"]:focus {
-    border-color: #4a90d9;
-    box-shadow: 0 0 0 3px rgba(74,144,217,0.12);
-    background: #fff;
-  }
-  .row {
-    display: flex;
-    gap: 16px;
-  }
-  .row .form-group {
-    flex: 1;
-  }
-  .result-box {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 12px;
-    padding: 20px 24px;
-    color: #fff;
-    margin-top: 24px;
-  }
-  .result-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 0;
-    font-size: 15px;
-  }
-  .result-row .label {
-    opacity: 0.85;
-    font-weight: 400;
-  }
-  .result-row .value {
-    font-weight: 600;
-    font-size: 18px;
-  }
-  .result-row.main {
-    border-top: 1px solid rgba(255,255,255,0.25);
-    margin-top: 8px;
-    padding-top: 14px;
-  }
-  .result-row.main .value {
-    font-size: 26px;
-    color: #ffe082;
-  }
-  .result-row .value.negative {
-    color: #ffcdd2;
-  }
-  .result-row .value.positive {
-    color: #c8e6c9;
-  }
-  .note {
-    font-size: 12px;
-    color: #aaa;
-    margin-top: 8px;
-    line-height: 1.6;
-  }
-  @media (max-width: 480px) {
-    .container { padding: 20px; }
-    h1 { font-size: 18px; }
-    .result-row .value { font-size: 16px; }
-    .result-row.main .value { font-size: 22px; }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>人民币美元换汇差额计算器</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --panel: #ffffff;
+      --panel-soft: #f7f9fc;
+      --line: #e8edf5;
+      --text: #1d2433;
+      --muted: #5d6879;
+      --primary: #2c6bed;
+      --primary-2: #5b8cff;
+      --good: #1f9d61;
+      --bad: #df5d5d;
+      --gold: #f4ba43;
+      --shadow: 0 18px 45px rgba(18, 33, 61, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(180deg, #eef3ff 0%, var(--bg) 100%);
+      color: var(--text);
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 16px;
+    }
+
+    .container {
+      width: min(980px, 100%);
+      background: var(--panel);
+      border: 1px solid rgba(127, 142, 170, 0.14);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 20px 24px 14px;
+      background: linear-gradient(135deg, rgba(44,107,237,0.06), rgba(91,140,255,0.02));
+      border-bottom: 1px solid var(--line);
+    }
+
+    .title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .title-wrap .icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color: white;
+      box-shadow: 0 12px 24px rgba(44,107,237,0.24);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.4rem, 2vw, 2rem);
+      letter-spacing: 0.02em;
+    }
+
+    .badge {
+      background: rgba(31,157,97,0.12);
+      color: var(--good);
+      border: 1px solid rgba(31,157,97,0.18);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 12px;
+      white-space: nowrap;
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 20px;
+      padding: 20px 24px 24px;
+      background: linear-gradient(180deg, rgba(247,249,252,0.65), #fff);
+    }
+
+    .panel {
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 20px;
+    }
+
+    .chart-panel {
+      margin-bottom: 18px;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .chart-header h2 {
+      margin: 0;
+      font-size: 1rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .rate-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(31,157,97,0.1);
+      color: var(--good);
+      border: 1px solid rgba(31,157,97,0.1);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .chart-box {
+      position: relative;
+      min-height: 220px;
+      border-radius: 16px;
+      overflow: hidden;
+      background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(228,236,255,0.4));
+      border: 1px solid rgba(95, 120, 170, 0.15);
+    }
+
+    .chart-loading {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-size: 14px;
+      text-align: center;
+      padding: 26px;
+      background: rgba(255,255,255,0.3);
+    }
+
+    form {
+      display: grid;
+      gap: 18px;
+    }
+
+    .field-group {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field-group label {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .field-group input {
+      width: 100%;
+      border: 1.5px solid var(--line);
+      background: #fff;
+      border-radius: 12px;
+      font-size: 15px;
+      color: var(--text);
+      padding: 13px 14px;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .field-group input:focus {
+      border-color: rgba(44,107,237,0.8);
+      box-shadow: 0 0 0 4px rgba(44,107,237,0.12);
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .result-panel {
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .summary-card {
+      background: linear-gradient(135deg, #2c6bed 0%, #5b8cff 100%);
+      border-radius: 18px;
+      padding: 18px 20px;
+      color: white;
+      box-shadow: 0 18px 30px rgba(44,107,237,0.25);
+    }
+
+    .summary-card h3 {
+      margin: 0 0 14px;
+      font-size: 0.9rem;
+      opacity: 0.9;
+      font-weight: 600;
+    }
+
+    .result-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.14);
+      font-size: 14px;
+    }
+
+    .result-item:last-child {
+      border-bottom: none;
+    }
+
+    .result-item strong {
+      font-size: 1.05rem;
+    }
+
+    .result-total {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.14);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .result-total strong {
+      font-size: clamp(1.5rem, 2vw, 2.1rem);
+      color: #fbe29d;
+    }
+
+    .status-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: rgba(44,107,237,0.08);
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--primary);
+      font-weight: 700;
+      border: 1px solid rgba(44,107,237,0.08);
+    }
+
+    .status-pill.good {
+      background: rgba(31,157,97,0.08);
+      color: var(--good);
+      border-color: rgba(31,157,97,0.12);
+    }
+
+    .status-pill.bad {
+      background: rgba(223,93,93,0.08);
+      color: var(--bad);
+      border-color: rgba(223,93,93,0.12);
+    }
+
+    .note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+      padding: 2px 2px 0;
+    }
+
+    .value-positive {
+      color: #d9f9eb;
+    }
+
+    .value-negative {
+      color: #ffe1e1;
+    }
+
+    @media (max-width: 760px) {
+      .content {
+        grid-template-columns: 1fr;
+      }
+
+      .row {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        padding: 16px 18px 12px;
+      }
+
+      .content {
+        padding: 16px 18px 18px;
+      }
+    }
+  </style>
 </head>
 <body>
-
-<div class="container">
-  <h1>💱 人民币美元汇率差计算器</h1>
-  <p class="subtitle">输入本金与两个汇率，实时计算换汇差额</p>
-
-  <div class="chart-section">
-    <div class="chart-header">
-      <h2>📈 美元兑人民币近期走势</h2>
-      <span class="rate-badge" id="latestRate">加载中…</span>
+  <div class="container">
+    <div class="topbar">
+      <div class="title-wrap">
+        <div class="icon">💱</div>
+        <h1>人民币美元换汇差额计算器</h1>
+      </div>
+      <span class="badge">实时汇率</span>
     </div>
-    <div id="chartContainer">
-      <div class="chart-loading">正在获取汇率数据…</div>
+
+    <div class="content">
+      <div>
+        <div class="panel chart-panel">
+          <div class="chart-header">
+            <h2>📈 美元兑人民币走势</h2>
+            <span class="rate-badge" id="latestRate">加载中…</span>
+          </div>
+          <div class="chart-box" id="chartContainer">
+            <div class="chart-loading">正在获取汇率数据…</div>
+          </div>
+        </div>
+
+        <form>
+          <div class="field-group">
+            <label for="principal">人民币本金（CNY）</label>
+            <input type="number" id="principal" value="10000" min="0" step="100" placeholder="请输入金额">
+          </div>
+
+          <div class="row">
+            <div class="field-group">
+              <label for="rateA">汇率 A（1 USD = X CNY）</label>
+              <input type="number" id="rateA" value="6.66" min="0.01" step="0.01" placeholder="例如：6.66">
+            </div>
+            <div class="field-group">
+              <label for="rateB">汇率 B（1 USD = X CNY）</label>
+              <input type="number" id="rateB" value="6.67" min="0.01" step="0.01" placeholder="例如：6.67">
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="result-panel">
+        <div class="summary-card">
+          <h3>换汇结果</h3>
+
+          <div class="result-item">
+            <span>按汇率 A 换得</span>
+            <strong id="resultA">$0.00</strong>
+          </div>
+
+          <div class="result-item">
+            <span>按汇率 B 换得</span>
+            <strong id="resultB">$0.00</strong>
+          </div>
+
+          <div class="result-total">
+            <span>换汇差额</span>
+            <strong id="difference">$0.00</strong>
+          </div>
+        </div>
+
+        <div class="status-row">
+          <span class="status-pill" id="betterOption">更划算方案：待计算</span>
+        </div>
+
+        <p class="note">
+          说明：汇率数值越大，说明美元越贵；同样的人民币兑换时，能拿到的美元就越少。<br>
+          计算公式：美元 = 人民币 ÷ 汇率；差额 = |按 A 换得 − 按 B 换得|。正负仅表示方向。
+        </p>
+      </div>
     </div>
   </div>
 
-  <div class="form-group">
-    <label for="principal">人民币本金（元）</label>
-    <input type="number" id="principal" value="10000" placeholder="例如：10000" min="0" step="100">
-  </div>
+  <script>
+    (function () {
+      'use strict';
 
-  <div class="row">
-    <div class="form-group">
-      <label for="rateA">汇率 A（美元/人民币）</label>
-      <input type="number" id="rateA" value="6.66" placeholder="例如：6.66" min="0" step="0.01">
-    </div>
-    <div class="form-group">
-      <label for="rateB">汇率 B（美元/人民币）</label>
-      <input type="number" id="rateB" value="6.67" placeholder="例如：6.67" min="0" step="0.01">
-    </div>
-  </div>
+      var principalEl = document.getElementById('principal');
+      var rateAEl = document.getElementById('rateA');
+      var rateBEl = document.getElementById('rateB');
+      var resultAEl = document.getElementById('resultA');
+      var resultBEl = document.getElementById('resultB');
+      var diffEl = document.getElementById('difference');
+      var betterOptionEl = document.getElementById('betterOption');
+      var chartContainer = document.getElementById('chartContainer');
+      var latestRateEl = document.getElementById('latestRate');
 
-  <div class="result-box">
-    <div class="result-row">
-      <span class="label">按汇率 A 换得</span>
-      <span class="value" id="resultA">$0.00</span>
-    </div>
-    <div class="result-row">
-      <span class="label">按汇率 B 换得</span>
-      <span class="value" id="resultB">$0.00</span>
-    </div>
-    <div class="result-row main">
-      <span class="label">换汇差额</span>
-      <span class="value" id="difference">$0.00</span>
-    </div>
-  </div>
+      function formatUSD(value) {
+        return '$' + Number(value || 0).toFixed(2);
+      }
 
-  <p class="note">
-    注：汇率数值越大，说明美元越贵，同样的人民币换得的美元越少。
-    <br>差额 = |本金 ÷ 汇率A − 本金 ÷ 汇率B|，正负仅表示方向。
-  </p>
-</div>
+      function calculate() {
+        var principal = parseFloat(principalEl.value) || 0;
+        var rateA = parseFloat(rateAEl.value) || 0;
+        var rateB = parseFloat(rateBEl.value) || 0;
 
-<script>
-(function() {
-  'use strict';
+        var usdA = rateA > 0 ? principal / rateA : 0;
+        var usdB = rateB > 0 ? principal / rateB : 0;
+        var diff = usdA - usdB;
 
-  // ===== 计算逻辑 =====
-  var principalEl = document.getElementById('principal');
-  var rateAEl = document.getElementById('rateA');
-  var rateBEl = document.getElementById('rateB');
-  var resultAEl = document.getElementById('resultA');
-  var resultBEl = document.getElementById('resultB');
-  var diffEl = document.getElementById('difference');
+        resultAEl.textContent = formatUSD(usdA);
+        resultBEl.textContent = formatUSD(usdB);
 
-  function formatUSD(n) {
-    return '$' + n.toFixed(2);
-  }
-
-  function calculate() {
-    var principal = parseFloat(principalEl.value) || 0;
-    var rateA = parseFloat(rateAEl.value) || 0;
-    var rateB = parseFloat(rateBEl.value) || 0;
-
-    var usdA = rateA > 0 ? principal / rateA : 0;
-    var usdB = rateB > 0 ? principal / rateB : 0;
-    var diff = usdA - usdB;
-
-    resultAEl.textContent = formatUSD(usdA);
-    resultBEl.textContent = formatUSD(usdB);
-
-    if (Math.abs(diff) < 0.001) {
-      diffEl.textContent = '$0.00';
-      diffEl.className = 'value';
-    } else {
-      var absDiff = Math.abs(diff);
-      var direction = diff > 0 ? '（A比B多）' : '（B比A多）';
-      diffEl.textContent = formatUSD(absDiff) + ' ' + direction;
-      diffEl.className = 'value ' + (diff > 0 ? 'positive' : 'negative');
-    }
-  }
-
-  principalEl.addEventListener('input', calculate);
-  rateAEl.addEventListener('input', calculate);
-  rateBEl.addEventListener('input', calculate);
-  calculate();
-
-  // ===== 图表逻辑 =====
-  // Frankfurter v1 API（注意 /v1 前缀，参数为 base / symbols）
-  var LATEST_API = 'https://api.frankfurter.dev/v1/latest?base=USD&symbols=CNY';
-  var HISTORY_API = 'https://api.frankfurter.dev/v1/2026-09-01..2026-10-09?base=USD&symbols=CNY';
-
-  var chartContainer = document.getElementById('chartContainer');
-  var latestRateEl = document.getElementById('latestRate');
-
-  function renderChart(dates, values, latestRate) {
-    var width = chartContainer.clientWidth || 640;
-    var height = 180;
-    var padding = { top: 16, right: 16, bottom: 28, left: 44 };
-
-    var chartW = width - padding.left - padding.right;
-    var chartH = height - padding.top - padding.bottom;
-
-    var minVal = Math.min.apply(null, values);
-    var maxVal = Math.max.apply(null, values);
-    var range = maxVal - minVal || 0.01;
-    minVal -= range * 0.15;
-    maxVal += range * 0.15;
-    range = maxVal - minVal;
-
-    var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + width + ' ' + height + '" style="width:100%;height:' + height + 'px;">';
-
-    var gridCount = 4;
-    for (var g = 0; g <= gridCount; g++) {
-      var y = padding.top + (chartH / gridCount) * g;
-      var val = maxVal - (range / gridCount) * g;
-      svg += '<line x1="' + padding.left + '" y1="' + y + '" x2="' + (padding.left + chartW) + '" y2="' + y + '" stroke="#eee" stroke-width="1"/>';
-      svg += '<text x="' + (padding.left - 6) + '" y="' + (y + 4) + '" text-anchor="end" font-size="10" fill="#aaa">' + val.toFixed(2) + '</text>';
-    }
-
-    var points = [];
-    for (var i = 0; i < values.length; i++) {
-      var x = padding.left + (chartW / (values.length - 1 || 1)) * i;
-      var y = padding.top + chartH - ((values[i] - minVal) / range) * chartH;
-      points.push({ x: x, y: y, val: values[i] });
-    }
-
-    var pathD = '';
-    for (var j = 0; j < points.length; j++) {
-      pathD += (j === 0 ? 'M' : 'L') + points[j].x.toFixed(1) + ',' + points[j].y.toFixed(1);
-    }
-
-    var areaD = pathD + ' L' + points[points.length - 1].x.toFixed(1) + ',' + (padding.top + chartH) +
-                ' L' + points[0].x.toFixed(1) + ',' + (padding.top + chartH) + ' Z';
-
-    svg += '<defs><linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">' +
-           '<stop offset="0%" stop-color="#667eea" stop-opacity="0.25"/>' +
-           '<stop offset="100%" stop-color="#667eea" stop-opacity="0.02"/>' +
-           '</linearGradient></defs>';
-    svg += '<path d="' + areaD + '" fill="url(#areaGrad)"/>';
-    svg += '<path d="' + pathD + '" fill="none" stroke="#667eea" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
-
-    var lastP = points[points.length - 1];
-    svg += '<circle cx="' + lastP.x.toFixed(1) + '" cy="' + lastP.y.toFixed(1) + '" r="3.5" fill="#667eea" stroke="#fff" stroke-width="2"/>';
-
-    var labelIndices = [0, Math.floor(dates.length / 2), dates.length - 1];
-    labelIndices = labelIndices.filter(function(v, idx, arr) { return arr.indexOf(v) === idx; });
-    for (var k = 0; k < labelIndices.length; k++) {
-      var idx = labelIndices[k];
-      var xPos = padding.left + (chartW / (dates.length - 1 || 1)) * idx;
-      svg += '<text x="' + xPos.toFixed(1) + '" y="' + (height - 6) + '" text-anchor="middle" font-size="10" fill="#aaa">' + dates[idx] + '</text>';
-    }
-
-    svg += '</svg>';
-    chartContainer.innerHTML = svg;
-
-    if (latestRate) {
-      latestRateEl.textContent = '最新: 1 USD = ' + latestRate.toFixed(4) + ' CNY';
-    }
-  }
-
-  function fetchChartData() {
-    fetch(HISTORY_API)
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        if (!data || !data.rates) {
-          throw new Error('数据格式异常');
+        if (Math.abs(diff) < 0.001) {
+          diffEl.textContent = '$0.00';
+          diffEl.className = 'value';
+          betterOptionEl.textContent = '更划算方案：两者相同';
+          betterOptionEl.className = 'status-pill';
+        } else {
+          var absDiff = Math.abs(diff);
+          var directionText = diff > 0 ? 'A 更划算' : 'B 更划算';
+          diffEl.textContent = formatUSD(absDiff) + (diff > 0 ? '（A比B多）' : '（B比A多）');
+          diffEl.className = diff > 0 ? 'value-positive' : 'value-negative';
+          betterOptionEl.textContent = '更划算方案：' + directionText;
+          betterOptionEl.className = 'status-pill ' + (diff > 0 ? 'good' : 'bad');
         }
-        var entries = Object.keys(data.rates).sort();
-        if (entries.length < 2) {
-          throw new Error('历史数据不足');
+      }
+
+      principalEl.addEventListener('input', calculate);
+      rateAEl.addEventListener('input', calculate);
+      rateBEl.addEventListener('input', calculate);
+      calculate();
+
+      function formatDate(date) {
+        return date.toISOString().slice(0, 10);
+      }
+
+      function buildHistoryUrl() {
+        var end = new Date();
+        end.setHours(0, 0, 0, 0);
+        var start = new Date(end);
+        start.setDate(start.getDate() - 30);
+        return 'https://api.frankfurter.dev/v1/' + formatDate(start) + '..' + formatDate(end) + '?base=USD&symbols=CNY';
+      }
+
+      function renderChart(dates, values, latestRate) {
+        var width = chartContainer.clientWidth || 620;
+        var height = 220;
+        var padding = { top: 16, right: 18, bottom: 28, left: 42 };
+        var chartW = width - padding.left - padding.right;
+        var chartH = height - padding.top - padding.bottom;
+
+        var minVal = Math.min.apply(null, values);
+        var maxVal = Math.max.apply(null, values);
+        var range = maxVal - minVal || 0.01;
+        minVal -= range * 0.12;
+        maxVal += range * 0.12;
+        range = maxVal - minVal;
+
+        var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="220" viewBox="0 0 ' + width + ' ' + height + '" preserveAspectRatio="none">';
+
+        var gridCount = 4;
+        for (var i = 0; i <= gridCount; i++) {
+          var y = padding.top + (chartH / gridCount) * i;
+          var tickValue = maxVal - (range / gridCount) * i;
+          svg += '<line x1="' + padding.left + '" y1="' + y + '" x2="' + (padding.left + chartW) + '" y2="' + y + '" stroke="#dfe6f1" stroke-width="1"/>';
+          svg += '<text x="' + (padding.left - 8) + '" y="' + (y + 4) + '" text-anchor="end" font-size="10" fill="#7f8aa0">' + tickValue.toFixed(2) + '</text>';
         }
-        var dates = [];
-        var values = [];
-        for (var i = 0; i < entries.length; i++) {
-          var d = entries[i];
-          var rate = data.rates[d] && data.rates[d].CNY;
-          if (rate) {
-            var parts = d.split('-');
-            dates.push(parts[1] + '/' + parts[2]);
-            values.push(rate);
-          }
+
+        var points = [];
+        for (var j = 0; j < values.length; j++) {
+          var x = padding.left + (chartW / (values.length - 1 || 1)) * j;
+          var y = padding.top + chartH - ((values[j] - minVal) / range) * chartH;
+          points.push({ x: x, y: y, value: values[j] });
         }
-        var latest = values[values.length - 1];
-        renderChart(dates, values, latest);
-      })
-      .catch(function(err) {
-        console.warn('历史数据获取失败:', err);
-        fetch(LATEST_API)
-          .then(function(res) { return res.json(); })
-          .then(function(data) {
-            if (data && data.rates && data.rates.CNY) {
-              latestRateEl.textContent = '最新: 1 USD = ' + data.rates.CNY.toFixed(4) + ' CNY';
+
+        var pathD = '';
+        for (var k = 0; k < points.length; k++) {
+          pathD += (k === 0 ? 'M' : 'L') + points[k].x.toFixed(1) + ',' + points[k].y.toFixed(1);
+        }
+
+        var areaD = pathD + ' L' + points[points.length - 1].x.toFixed(1) + ',' + (padding.top + chartH) +
+                    ' L' + points[0].x.toFixed(1) + ',' + (padding.top + chartH) + ' Z';
+
+        svg += '<defs>' +
+          '<linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">' +
+          '<stop offset="0%" stop-color="#2c6bed" stop-opacity="0.25"/>' +
+          '<stop offset="100%" stop-color="#2c6bed" stop-opacity="0.02"/>' +
+          '</linearGradient>' +
+          '</defs>';
+
+        svg += '<path d="' + areaD + '" fill="url(#areaGrad)"/>';
+        svg += '<path d="' + pathD + '" fill="none" stroke="#2c6bed" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>';
+
+        var lastPoint = points[points.length - 1];
+        svg += '<circle cx="' + lastPoint.x.toFixed(1) + '" cy="' + lastPoint.y.toFixed(1) + '" r="4" fill="#2c6bed" stroke="#fff" stroke-width="2"/>';
+
+        var labelIndices = [0, Math.floor((dates.length - 1) / 2), dates.length - 1];
+        labelIndices = labelIndices.filter(function (value, index, arr) { return arr.indexOf(value) === index; });
+        for (var m = 0; m < labelIndices.length; m++) {
+          var idx = labelIndices[m];
+          var x = padding.left + (chartW / (dates.length - 1 || 1)) * idx;
+          svg += '<text x="' + x.toFixed(1) + '" y="' + (height - 8) + '" text-anchor="middle" font-size="10" fill="#7f8aa0">' + dates[idx] + '</text>';
+        }
+
+        svg += '</svg>';
+        chartContainer.innerHTML = svg;
+
+        latestRateEl.textContent = '最新: 1 USD = ' + Number(latestRate).toFixed(4) + ' CNY';
+      }
+
+      function fetchChartData() {
+        var historyUrl = buildHistoryUrl();
+
+        fetch(historyUrl)
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            if (!data || !data.rates) {
+              throw new Error('数据格式异常');
             }
-            chartContainer.innerHTML = '<div class="chart-loading">📉 历史走势暂时不可用<br><span style="font-size:12px;">当前汇率已在右上角显示</span></div>';
+
+            var entries = Object.keys(data.rates).sort();
+            if (entries.length < 2) {
+              throw new Error('历史数据不足');
+            }
+
+            var labels = [];
+            var values = [];
+
+            for (var i = 0; i < entries.length; i++) {
+              var day = entries[i];
+              var rate = data.rates[day] && data.rates[day].CNY;
+              if (rate) {
+                labels.push(day.slice(5).replace('-', '/'));
+                values.push(rate);
+              }
+            }
+
+            if (values.length === 0) {
+              throw new Error('没有可用汇率');
+            }
+
+            renderChart(labels, values, values[values.length - 1]);
           })
-          .catch(function() {
-            latestRateEl.textContent = '数据暂不可用';
-            chartContainer.innerHTML = '<div class="chart-loading">📉 图表数据暂时不可��</div>';
+          .catch(function () {
+            fetch('https://api.frankfurter.dev/v1/latest?base=USD&symbols=CNY')
+              .then(function (res) { return res.json(); })
+              .then(function (data) {
+                if (data && data.rates && data.rates.CNY) {
+                  latestRateEl.textContent = '最新: 1 USD = ' + Number(data.rates.CNY).toFixed(4) + ' CNY';
+                }
+                chartContainer.innerHTML = '<div class="chart-loading">📉 历史走势暂时不可用<br><span style="font-size:12px; opacity:0.8;">当前汇率已在右上角显示</span></div>';
+              })
+              .catch(function () {
+                latestRateEl.textContent = '数据暂不可用';
+                chartContainer.innerHTML = '<div class="chart-loading">📉 图表数据暂时不可用</div>';
+              });
           });
+      }
+
+      setTimeout(fetchChartData, 120);
+
+      var resizeTimer;
+      window.addEventListener('resize', function () {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(fetchChartData, 300);
       });
-  }
-
-  setTimeout(fetchChartData, 100);
-
-  var resizeTimer;
-  window.addEventListener('resize', function() {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function() {
-      fetchChartData();
-    }, 300);
-  });
-
-})();
-</script>
-
+    })();
+  </script>
 </body>
 </html>
